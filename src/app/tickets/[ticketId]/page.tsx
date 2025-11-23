@@ -1,19 +1,30 @@
-import { initialTickets } from "@/data";
+import Link from 'next/link';
+import type { ReactElement } from 'react';
+import Placeholder from '@/components/Placeholder';
+import { Button } from '@/components/ui/button';
+import { initialTickets } from '@/data';
+import TicketItem from '@/features/ticket/components/TicketItem';
 
 type Props = {
 	params: Promise<{ ticketId: string }>;
+	icon?: ReactElement;
 };
 
 export default async function TicketsPage({ params }: Props) {
 	const { ticketId } = await params;
 	const ticket = initialTickets.find((t) => t.id === ticketId);
 	if (!ticket) {
-		return <h1 className="text-6xl">Ticket not found</h1>;
+		return (
+			<Placeholder label="Ticket not found">
+				<Button asChild variant="outline">
+					<Link href="/tickets">Go back</Link>
+				</Button>
+			</Placeholder>
+		);
 	}
 	return (
-		<div>
-			<h1 className="text-6xl">{ticket.title}</h1>
-			<p>{ticket.content}</p>
+		<div className="flex justify-center animate-fade-from-top">
+			<TicketItem ticket={ticket} isDetail />
 		</div>
 	);
 }
