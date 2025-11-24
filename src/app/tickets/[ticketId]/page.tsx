@@ -1,9 +1,7 @@
-import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import type { ReactElement } from 'react';
-import Placeholder from '@/components/Placeholder';
-import { Button } from '@/components/ui/button';
-import { initialTickets } from '@/data';
 import TicketItem from '@/features/ticket/components/TicketItem';
+import getTicket from '@/features/ticket/queries/getTicket';
 
 type Props = {
 	params: Promise<{ ticketId: string }>;
@@ -12,16 +10,12 @@ type Props = {
 
 export default async function TicketsPage({ params }: Props) {
 	const { ticketId } = await params;
-	const ticket = initialTickets.find((t) => t.id === ticketId);
+	const ticket = await getTicket(ticketId);
+
 	if (!ticket) {
-		return (
-			<Placeholder label="Ticket not found">
-				<Button asChild variant="outline">
-					<Link href="/tickets">Go back</Link>
-				</Button>
-			</Placeholder>
-		);
+		notFound();
 	}
+
 	return (
 		<div className="flex justify-center animate-fade-from-top">
 			<TicketItem ticket={ticket} isDetail />
