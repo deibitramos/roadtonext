@@ -1,10 +1,9 @@
-import { initialTickets } from '@/data';
-import { delay } from '@/lib/utils';
-import type { Ticket } from '../types';
+import prisma from '@/lib/prisma';
 
-const getTickets = async (): Promise<Ticket[]> => {
-	await delay(2000);
-	return new Promise((resolve) => resolve(initialTickets));
+const getTickets = async () => {
+	return await prisma.ticket.findMany({
+		orderBy: { createdAt: 'desc' },
+	});
 };
 
 export default getTickets;
