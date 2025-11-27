@@ -1,0 +1,17 @@
+'use client';
+
+import { LoaderCircleIcon } from 'lucide-react';
+import { useFormStatus } from 'react-dom';
+import { Button } from '../ui/button';
+
+const SubmitButton = ({ label }: { label: string }) => {
+	const { pending } = useFormStatus();
+	return (
+		<Button type="submit" disabled={pending}>
+			{pending && <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />}
+			{label}
+		</Button>
+	);
+};
+
+export default SubmitButton;

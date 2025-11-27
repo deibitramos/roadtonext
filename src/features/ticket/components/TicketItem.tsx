@@ -1,11 +1,10 @@
-import { SquareArrowOutUpRightIcon, TrashIcon } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Ticket } from '@/generated/prisma/client';
 import { cn } from '@/lib/utils';
-import deleteTicket from '../actions/deleteTicket';
 import { TICKET_ICONS } from '../constants';
+import DeleteButton from './DeleteButton';
+import EditButton from './EditButton';
+import GoToTicketButton from './GoToTicketButton';
 
 type Props = {
 	ticket: Ticket;
@@ -34,19 +33,9 @@ function TicketItem({ ticket, isDetail = false }: Props) {
 				</CardContent>
 			</Card>
 			<div className="flex flex-col gap-y-1">
-				{isDetail ? (
-					<form action={deleteTicket.bind(null, ticket.id)}>
-						<Button variant="outline" size="icon" type="submit">
-							<TrashIcon className="h-4 w-4" />
-						</Button>
-					</form>
-				) : (
-					<Button variant="outline" size="icon" asChild>
-						<Link prefetch href={`/tickets/${ticket.id}`}>
-							<SquareArrowOutUpRightIcon className="h-4 w-4" />
-						</Link>
-					</Button>
-				)}
+				{!isDetail && <GoToTicketButton id={ticket.id} />}
+				<EditButton id={ticket.id} />
+				{isDetail && <DeleteButton id={ticket.id} />}
 			</div>
 		</div>
 	);
