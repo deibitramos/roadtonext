@@ -1,10 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Ticket } from '@/generated/prisma/client';
 import { cn } from '@/lib/utils';
-import { TICKET_ICONS } from '../constants';
-import DeleteButton from './DeleteButton';
+import { toCurrencyFromCent } from '@/utils/currency';
+import { TICKET_STATUS } from '../constants';
 import EditButton from './EditButton';
 import GoToTicketButton from './GoToTicketButton';
+import TicketMoreMenu from './TicketMoreMenu';
 
 type Props = {
 	ticket: Ticket;
@@ -22,7 +23,7 @@ function TicketItem({ ticket, isDetail = false }: Props) {
 			<Card key={ticket.id} className="w-full">
 				<CardHeader>
 					<CardTitle className="flex gap-x-2 font-bold items-center">
-						<span>{TICKET_ICONS[ticket.status]}</span>
+						<span>{TICKET_STATUS[ticket.status].icon}</span>
 						<span className="truncate">{ticket.title}</span>
 					</CardTitle>
 				</CardHeader>
@@ -31,11 +32,17 @@ function TicketItem({ ticket, isDetail = false }: Props) {
 						{ticket.content}
 					</span>
 				</CardContent>
+				<CardFooter className="flex justify-between">
+					<p className="text-sm text-muted-foreground">Deadline: {ticket.deadline}</p>
+					<p className="text-sm text-muted-foreground">
+						Bounty: {toCurrencyFromCent(ticket.bounty)}
+					</p>
+				</CardFooter>
 			</Card>
 			<div className="flex flex-col gap-y-1">
 				{!isDetail && <GoToTicketButton id={ticket.id} />}
 				<EditButton id={ticket.id} />
-				{isDetail && <DeleteButton id={ticket.id} />}
+				{isDetail && <TicketMoreMenu ticket={ticket} />}
 			</div>
 		</div>
 	);

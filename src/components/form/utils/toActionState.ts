@@ -10,7 +10,7 @@ export type ActionState = {
 
 export const EMPTY_ACTION_STATE: ActionState = { message: '', timestamp: Date.now() };
 
-export const fromErrorToActionState = (error: unknown, formData: FormData): ActionState => {
+export const fromErrorToActionState = (error: unknown, formData?: FormData): ActionState => {
 	if (error instanceof ZodError) {
 		const fieldErrors = z.flattenError(error).fieldErrors;
 		return { message: '', fieldErrors, payload: formData, status: 'ERROR', timestamp: Date.now() };

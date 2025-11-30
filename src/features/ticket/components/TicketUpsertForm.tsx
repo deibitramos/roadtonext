@@ -1,6 +1,7 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useRef } from 'react';
+import { DatePicker, type DatePickerImperativeHandle } from '@/components/DatePicker';
 import FieldError from '@/components/form/FieldError';
 import Form from '@/components/form/Form';
 import SubmitButton from '@/components/form/SubmitButton';
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { Ticket } from '@/generated/prisma/client';
+import { fromCent } from '@/utils/currency';
 import upsertTicket from '../actions/upsertTicket';
 
 type Props = {
@@ -21,8 +23,14 @@ function TicketUpsertForm({ ticket }: Props) {
 		EMPTY_ACTION_STATE,
 	);
 
+	const datePickerImperativeHandleRef = useRef<DatePickerImperativeHandle>(null);
+
+	const onSuccess = () => {
+		datePickerImperativeHandleRef.current?.reset();
+	};
+
 	return (
-		<Form action={action} actionState={actionState}>
+		<Form action={action} actionState={actionState} onSuccess={onSuccess}>
 			<Label htmlFor="title">Title:</Label>
 			<Input
 				id="title"
@@ -39,6 +47,34 @@ function TicketUpsertForm({ ticket }: Props) {
 				defaultValue={(actionState?.payload?.get('content') as string) ?? ticket?.content}
 			/>
 			<FieldError actionState={actionState} name="content" />
+
+			<div className="grid grid-cols-2 gap-4">
+				<div>
+					<Label htmlFor="deadline">Deadline:</Label>
+					<DatePicker
+						id="deadline"
+						name="deadline"
+						defaultValue={(actionState?.payload?.get('deadline') as string) ?? ticket?.deadline}
+						imperativeHandleRef={datePickerImperativeHandleRef}
+					/>
+					<FieldError actionState={actionState} name="deadline" />
+				</div>
+
+				<div>
+					<Label htmlFor="bounty">Bounty:</Label>
+					<Input
+						id="bounty"
+						name="bounty"
+						type="number"
+						step=".01"
+						defaultValue={
+							(actionState?.payload?.get('bounty') as string) ??
+							(ticket?.bounty ? fromCent(ticket.bounty) : '')
+						}
+					/>
+					<FieldError actionState={actionState} name="bounty" />
+				</div>
+			</div>
 
 			<SubmitButton label={ticket ? 'Update' : 'Create'} />
 		</Form>
