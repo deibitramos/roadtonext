@@ -9,6 +9,7 @@ import {
 	fromErrorToActionState,
 	toActionState,
 } from '@/components/form/utils/toActionState';
+import getServerSession from '@/lib/auth/getServerSession';
 import prisma from '@/lib/prisma';
 import { toCent } from '@/utils/currency';
 
@@ -24,6 +25,7 @@ const upsertTicket = async (
 	_actionState: ActionState,
 	formData: FormData,
 ) => {
+	const { user } = await getServerSession();
 	try {
 		const data = upsertTicketSchema.parse({
 			title: formData.get('title'),
@@ -34,6 +36,7 @@ const upsertTicket = async (
 
 		const dbData = {
 			...data,
+			userId: user.id,
 			bounty: toCent(data.bounty),
 		};
 

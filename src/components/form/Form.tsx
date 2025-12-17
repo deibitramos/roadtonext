@@ -1,33 +1,17 @@
 import type { PropsWithChildren } from 'react';
-import { toast } from 'sonner';
-import useActionFeedback from './hooks/useActionFeedback';
-import type { ActionState } from './utils/toActionState';
+import { FormProvider } from 'react-hook-form';
+import type { HookFormType } from './hooks/useForm';
 
 type Props = {
-	action: (payload: FormData) => void;
-	actionState: ActionState;
-	onSuccess?: (actionState: ActionState) => void;
-	onError?: (actionState: ActionState) => void;
+	form: HookFormType;
 };
 
-function Form({ action, actionState, children, onSuccess, onError }: PropsWithChildren<Props>) {
-	useActionFeedback(actionState, {
-		onSuccess: ({ actionState }) => {
-			onSuccess?.(actionState);
-			if (!actionState.message) return;
-			toast.success(actionState.message);
-		},
-		onError: ({ actionState }) => {
-			onError?.(actionState);
-			if (!actionState.message) return;
-			toast.error(actionState.message);
-		},
-	});
-
+function Form({ form, children }: PropsWithChildren<Props>) {
+	const { onSubmit, formHook } = form;
 	return (
-		<form action={action} className="flex flex-col gap-y-2">
-			{children}
-		</form>
+		<FormProvider {...formHook}>
+			<form onSubmit={onSubmit}>{children}</form>
+		</FormProvider>
 	);
 }
 

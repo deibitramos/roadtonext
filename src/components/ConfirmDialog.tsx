@@ -1,5 +1,5 @@
 import { type ReactElement, useActionState } from 'react';
-import Form from './form/Form';
+import ActionForm from './form/ActionForm';
 import { type ActionState, EMPTY_ACTION_STATE } from './form/utils/toActionState';
 import {
 	AlertDialog,
@@ -43,9 +43,9 @@ function ConfirmDialog({
 				<AlertDialogFooter>
 					<AlertDialogCancel>Cancel</AlertDialogCancel>
 					<AlertDialogAction asChild>
-						<Form action={newAction} actionState={actionState}>
+						<ActionForm action={newAction} actionState={actionState}>
 							<Button type="submit">Confirm</Button>
-						</Form>
+						</ActionForm>
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

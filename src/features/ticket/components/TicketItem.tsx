@@ -1,25 +1,20 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Ticket } from '@/generated/prisma/client';
 import { cn } from '@/lib/utils';
 import { toCurrencyFromCent } from '@/utils/currency';
 import { TICKET_STATUS } from '../constants';
+import type { TicketWithUser } from '../queries/getTicket';
 import EditButton from './EditButton';
 import GoToTicketButton from './GoToTicketButton';
 import TicketMoreMenu from './TicketMoreMenu';
 
 type Props = {
-	ticket: Ticket;
+	ticket: TicketWithUser;
 	isDetail?: boolean;
 };
 
 function TicketItem({ ticket, isDetail = false }: Props) {
 	return (
-		<div
-			className={cn('w-full flex gap-x-1', {
-				'max-w-[580px]': isDetail,
-				'max-w-[420px]': !isDetail,
-			})}
-		>
+		<div className={cn('w-full flex gap-x-1', { 'max-w-145': isDetail, 'max-w-105': !isDetail })}>
 			<Card key={ticket.id} className="w-full">
 				<CardHeader>
 					<CardTitle className="flex gap-x-2 font-bold items-center">
@@ -33,7 +28,9 @@ function TicketItem({ ticket, isDetail = false }: Props) {
 					</span>
 				</CardContent>
 				<CardFooter className="flex justify-between">
-					<p className="text-sm text-muted-foreground">Deadline: {ticket.deadline}</p>
+					<p className="text-sm text-muted-foreground">
+						Deadline: {ticket.deadline} by {ticket.user.name}
+					</p>
 					<p className="text-sm text-muted-foreground">
 						Bounty: {toCurrencyFromCent(ticket.bounty)}
 					</p>

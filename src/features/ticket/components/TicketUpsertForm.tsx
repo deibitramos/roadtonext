@@ -1,20 +1,21 @@
 'use client';
 
 import { useActionState, useRef } from 'react';
+import { useFormStatus } from 'react-dom';
 import { DatePicker, type DatePickerImperativeHandle } from '@/components/DatePicker';
+import ActionForm from '@/components/form/ActionForm';
 import FieldError from '@/components/form/FieldError';
-import Form from '@/components/form/Form';
 import SubmitButton from '@/components/form/SubmitButton';
 import { EMPTY_ACTION_STATE } from '@/components/form/utils/toActionState';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import type { Ticket } from '@/generated/prisma/client';
 import { fromCent } from '@/utils/currency';
 import upsertTicket from '../actions/upsertTicket';
+import type { TicketWithUser } from '../queries/getTicket';
 
 type Props = {
-	ticket?: Ticket;
+	ticket?: TicketWithUser;
 };
 
 function TicketUpsertForm({ ticket }: Props) {
@@ -22,6 +23,7 @@ function TicketUpsertForm({ ticket }: Props) {
 		upsertTicket.bind(null, ticket?.id),
 		EMPTY_ACTION_STATE,
 	);
+	const { pending } = useFormStatus();
 
 	const datePickerImperativeHandleRef = useRef<DatePickerImperativeHandle>(null);
 
@@ -30,7 +32,7 @@ function TicketUpsertForm({ ticket }: Props) {
 	};
 
 	return (
-		<Form action={action} actionState={actionState} onSuccess={onSuccess}>
+		<ActionForm action={action} actionState={actionState} onSuccess={onSuccess}>
 			<Label htmlFor="title">Title:</Label>
 			<Input
 				id="title"
@@ -76,8 +78,8 @@ function TicketUpsertForm({ ticket }: Props) {
 				</div>
 			</div>
 
-			<SubmitButton label={ticket ? 'Update' : 'Create'} />
-		</Form>
+			<SubmitButton isSubmitting={pending}>{ticket ? 'Update' : 'Create'}</SubmitButton>
+		</ActionForm>
 	);
 }
 

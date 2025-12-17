@@ -11,13 +11,13 @@ type Props = {
 function CardCompact(props: PropsWithChildren<Props>) {
 	const { title, description, className, footer, children } = props;
 	return (
-		<Card className={`w-full max-w-[420px] self-center ${className}`}>
+		<Card className={`w-full max-w-105 self-center ${className}`}>
 			<CardHeader>
 				<CardTitle>{title}</CardTitle>
 				<CardDescription>{description}</CardDescription>
 			</CardHeader>
 			<CardContent>{children}</CardContent>
-			{footer && <CardFooter>{footer}</CardFooter>}
+			{footer && <CardFooter className="justify-between">{footer}</CardFooter>}
 		</Card>
 	);
 }
