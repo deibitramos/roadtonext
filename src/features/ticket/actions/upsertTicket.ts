@@ -9,7 +9,8 @@ import {
 	fromErrorToActionState,
 	toActionState,
 } from '@/components/form/utils/toActionState';
-import getServerSession from '@/lib/auth/getServerSession';
+import isOwner from '@/features/auth/utils/isOwner';
+import { getSessionUser } from '@/lib/auth/session';
 import prisma from '@/lib/prisma';
 import { toCent } from '@/utils/currency';
 
@@ -25,8 +26,14 @@ const upsertTicket = async (
 	_actionState: ActionState,
 	formData: FormData,
 ) => {
-	const { user } = await getServerSession();
+	const user = await getSessionUser();
+
 	try {
+		if (!id) {
+			const ticket = await prisma.ticket.findUnique({ where: { id } });
+			if (!ticket || !isOwner(user, ticket)) return toActionState('Not authorized', 'ERROR');
+		}
+
 		const data = upsertTicketSchema.parse({
 			title: formData.get('title'),
 			content: formData.get('content'),

@@ -1,8 +1,12 @@
 import getTickets from '../queries/getTickets';
 import TicketItem from './TicketItem';
 
-async function TicketList() {
-	const tickets = await getTickets();
+type Props = {
+	userId?: string;
+};
+
+async function TicketList({ userId }: Props) {
+	const tickets = await getTickets(userId);
 
 	return (
 		<div className="flex flex-1 flex-col items-center gap-y-4 animate-fade-from-top">

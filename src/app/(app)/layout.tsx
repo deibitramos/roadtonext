@@ -1,15 +1,18 @@
-import Header from '@/components/Header';
-import Main from '@/components/Main';
-import PrivateNavButtons from '@/components/PrivateNavButtons';
+import AccountDropdown from '../_navigation/AccountDropdown';
+import AuthenticatedContainer from '../_navigation/AuthContainer';
+import Header from '../_navigation/Header';
+import Main from '../_navigation/Main';
 
 type Props = { children?: React.ReactNode };
-export default function PrivateLayout({ children }: Props) {
+export default async function PrivateLayout({ children }: Props) {
 	return (
 		<>
 			<Header>
-				<PrivateNavButtons />
+				<AccountDropdown />
 			</Header>
-			<Main>{children}</Main>
+			<AuthenticatedContainer>
+				<Main>{children}</Main>
+			</AuthenticatedContainer>
 		</>
 	);
 }

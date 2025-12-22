@@ -5,17 +5,19 @@ import Heading from '@/components/Heading';
 import Spinner from '@/components/Spinner';
 import TicketList from '@/features/ticket/components/TicketList';
 import TicketUpsertForm from '@/features/ticket/components/TicketUpsertForm';
+import { getSessionUser } from '@/lib/auth/session';
 
-export default function TicketsPage() {
+export default async function TicketsPage() {
+	const user = await getSessionUser();
 	return (
 		<div className="flex flex-1 flex-col gap-y-8">
-			<Heading title="Tickets" description="Your place to manage tickets" />
+			<Heading title="My Tickets" description="All your tickets at one place" />
 			<CardCompact title="Create Ticket" description="A new ticket will be created">
 				<TicketUpsertForm />
 			</CardCompact>
 			<ErrorBoundary>
 				<Suspense fallback={<Spinner />}>
-					<TicketList />
+					<TicketList userId={user.id} />
 				</Suspense>
 			</ErrorBoundary>
 		</div>

@@ -1,27 +1,28 @@
 'use client';
 
 import { LogOutIcon } from 'lucide-react';
-import { redirect } from 'next/navigation';
-import { useTransition } from 'react';
-import SubmitButton from '@/components/form/SubmitButton';
+import { useRouter } from 'next/navigation';
 import { signOut } from '@/lib/auth/client';
 
 function SignOutButton() {
-	const [isPending, startTransition] = useTransition();
+	const router = useRouter();
 
-	const onClick = () => {
-		startTransition(async () => {
-			await signOut({
-				fetchOptions: { onSuccess: () => redirect('/') },
-			});
-		});
+	const onSignOutSuccess = () => {
+		router.push('/');
+		router.refresh();
+	};
+
+	const onClick = async () => {
+		await signOut({ fetchOptions: { onSuccess: onSignOutSuccess } });
 	};
 
 	return (
-		<SubmitButton type="button" isSubmitting={isPending} onClick={onClick}>
-			Sign out
-			<LogOutIcon />
-		</SubmitButton>
+		<>
+			<LogOutIcon className="mr-2 size-4" />
+			<button type="button" onClick={onClick}>
+				Sign out
+			</button>
+		</>
 	);
 }
 

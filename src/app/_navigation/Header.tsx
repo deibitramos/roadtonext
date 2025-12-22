@@ -1,7 +1,7 @@
 import { KanbanIcon } from 'lucide-react';
 import Link from 'next/link';
-import ThemeSwitcher from './theme/ThemeSwitcher';
-import { Button } from './ui/button';
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher';
+import { Button } from '@/components/ui/button';
 
 type Props = { children?: React.ReactNode };
 

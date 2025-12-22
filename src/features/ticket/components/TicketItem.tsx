@@ -1,4 +1,6 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import isOwner from '@/features/auth/utils/isOwner';
+import { getAuthSession } from '@/lib/auth/session';
 import { cn } from '@/lib/utils';
 import { toCurrencyFromCent } from '@/utils/currency';
 import { TICKET_STATUS } from '../constants';
@@ -12,7 +14,10 @@ type Props = {
 	isDetail?: boolean;
 };
 
-function TicketItem({ ticket, isDetail = false }: Props) {
+async function TicketItem({ ticket, isDetail = false }: Props) {
+	const auth = await getAuthSession();
+	const isTicketOwner = isOwner(auth?.user, ticket);
+
 	return (
 		<div className={cn('w-full flex gap-x-1', { 'max-w-145': isDetail, 'max-w-105': !isDetail })}>
 			<Card key={ticket.id} className="w-full">
@@ -38,8 +43,8 @@ function TicketItem({ ticket, isDetail = false }: Props) {
 			</Card>
 			<div className="flex flex-col gap-y-1">
 				{!isDetail && <GoToTicketButton id={ticket.id} />}
-				<EditButton id={ticket.id} />
-				{isDetail && <TicketMoreMenu ticket={ticket} />}
+				{isTicketOwner && <EditButton id={ticket.id} />}
+				{isTicketOwner && isDetail && <TicketMoreMenu ticket={ticket} />}
 			</div>
 		</div>
 	);

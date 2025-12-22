@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { ReactElement } from 'react';
+import { type BreadcrumbData, Breadcrumbs } from '@/components/Breadcrumbs';
+import { Separator } from '@/components/ui/separator';
 import TicketItem from '@/features/ticket/components/TicketItem';
 import getTicket from '@/features/ticket/queries/getTicket';
 
@@ -16,9 +18,18 @@ export default async function TicketsPage({ params }: Props) {
 		notFound();
 	}
 
+	const breadcrumbData: BreadcrumbData[] = [
+		{ title: 'Tickets', href: '/' },
+		{ title: ticket.title },
+	];
+
 	return (
-		<div className="flex justify-center animate-fade-from-top">
-			<TicketItem ticket={ticket} isDetail />
+		<div className="flex flex-1 flex-col gap-y-8">
+			<Breadcrumbs breadcrumbs={breadcrumbData} />
+			<Separator />
+			<div className="flex justify-center animate-fade-from-top">
+				<TicketItem ticket={ticket} isDetail />
+			</div>
 		</div>
 	);
 }
