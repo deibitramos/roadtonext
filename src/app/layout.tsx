@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { NuqsAdapter } from 'nuqs/adapters/next';
 import ThemeProvider from '@/components/theme/ThemeProvider';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -24,10 +25,12 @@ export default function RootLayout({ children }: Props) {
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-				<ThemeProvider>
-					{children}
-					<Toaster expand />
-				</ThemeProvider>
+				<NuqsAdapter>
+					<ThemeProvider>
+						{children}
+						<Toaster expand />
+					</ThemeProvider>
+				</NuqsAdapter>
 			</body>
 		</html>
 	);

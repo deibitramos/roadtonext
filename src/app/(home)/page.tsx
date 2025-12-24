@@ -1,9 +1,16 @@
+import type { SearchParams } from 'nuqs/server';
 import { Suspense } from 'react';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Spinner from '@/components/Spinner';
 import TicketList from '@/features/ticket/components/TicketList';
+import { searchParamsCache } from '@/features/ticket/searchParams';
 
-export default function HomePage() {
+type Props = {
+	searchParams: Promise<SearchParams>;
+};
+
+export default async function HomePage({ searchParams }: Props) {
+	const params = await searchParams;
 	return (
 		<div className="flex flex-1 flex-col gap-y-8">
 			<div>
@@ -12,7 +19,7 @@ export default function HomePage() {
 			</div>
 			<ErrorBoundary>
 				<Suspense fallback={<Spinner />}>
-					<TicketList />
+					<TicketList searchParams={searchParamsCache.parse(params)} />
 				</Suspense>
 			</ErrorBoundary>
 		</div>
