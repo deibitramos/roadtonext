@@ -19,7 +19,7 @@ export default function SignInPage() {
 			<CardCompact
 				title="Sign In"
 				description="Sign in to your account"
-				className="animate-fade-from-top"
+				className="w-full max-w-105 self-center animate-fade-from-top"
 				footer={LoginFooter}
 			>
 				<SignInForm />

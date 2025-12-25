@@ -11,7 +11,7 @@ type Props = {
 function CardCompact(props: PropsWithChildren<Props>) {
 	const { title, description, className, footer, children } = props;
 	return (
-		<Card className={`w-full max-w-105 self-center ${className}`}>
+		<Card className={`${className}`}>
 			<CardHeader>
 				<CardTitle>{title}</CardTitle>
 				<CardDescription>{description}</CardDescription>

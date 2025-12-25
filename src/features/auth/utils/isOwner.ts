@@ -1,10 +1,12 @@
-import type { User } from 'better-auth';
-
-type Entity = {
-	userId: string;
+type UserWithId = {
+	id: string;
 };
 
-const isOwner = (user: User | undefined, entity: Entity) => {
+type Entity = {
+	userId: string | null;
+};
+
+const isOwner = (user: UserWithId | undefined, entity: Entity) => {
 	return !!user && user.id === entity.userId;
 };
 

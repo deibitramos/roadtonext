@@ -19,7 +19,11 @@ export default async function TicketsPage({ searchParams }: Props) {
 	return (
 		<div className="flex flex-1 flex-col gap-y-8">
 			<Heading title="My Tickets" description="All your tickets at one place" />
-			<CardCompact title="Create Ticket" description="A new ticket will be created">
+			<CardCompact
+				title="Create Ticket"
+				description="A new ticket will be created"
+				className="w-full max-w-105 self-center"
+			>
 				<TicketUpsertForm />
 			</CardCompact>
 			<ErrorBoundary>

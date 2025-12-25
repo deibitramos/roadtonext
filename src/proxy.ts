@@ -1,15 +1,15 @@
 import { getSessionCookie } from 'better-auth/cookies';
 import { type NextRequest, NextResponse } from 'next/server';
 
-const apiAuthPrefix = '/api/auth';
+const apiPrefix = '/api';
 const authRoutes = ['/sign-in', '/sign-up', '/forgot-password'];
 const publicRoutes = ['/'];
 const DEFAULT_LOGIN_REDIRECT = '/';
 
 export async function proxy(request: NextRequest) {
 	const url = request.nextUrl.pathname;
-	const isApiAuth = url.startsWith(apiAuthPrefix);
-	if (isApiAuth) return NextResponse.next();
+	const isApi = url.startsWith(apiPrefix);
+	if (isApi) return NextResponse.next();
 
 	const session = getSessionCookie(request);
 	const isPublicRoute = publicRoutes.includes(url);

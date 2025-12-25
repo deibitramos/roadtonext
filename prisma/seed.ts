@@ -21,13 +21,21 @@ const accounts = [
 });
 
 const tickets = [
-	['First Ticket', 'first', 'DONE', 49900, 'admin-id'] as const,
-	['Second Ticket', 'second', 'OPEN', 39900, 'admin-id'] as const,
-	['Third Ticket', 'third', 'IN_PROGRESS', 59900, 'user-id'] as const,
-].map(([title, content, status, bounty, userId]) => ({
-	...{ title, content: `This is the first ${content} from DB`, status },
+	['ticket-1', 'First Ticket', 'first', 'DONE', 49900, 'admin-id'] as const,
+	['ticket-2', 'Second Ticket', 'second', 'OPEN', 39900, 'admin-id'] as const,
+	['ticket-3', 'Third Ticket', 'third', 'IN_PROGRESS', 59900, 'user-id'] as const,
+].map(([id, title, content, status, bounty, userId]) => ({
+	...{ id, title, content: `This is the first ${content} from DB`, status },
 	...{ bounty, deadline: new Date().toISOString().split('T')[0], userId },
 }));
+
+const comments = [
+	['Great work on this ticket!', 'ticket-1', 'user-id'] as const,
+	['Thanks for the feedback!', 'ticket-1', 'admin-id'] as const,
+	['I need more information about this.', 'ticket-2', 'user-id'] as const,
+	['Sure, what do you need?', 'ticket-2', 'admin-id'] as const,
+	['This is taking longer than expected.', 'ticket-2', 'user-id'] as const,
+].map(([content, ticketId, userId]) => ({ content, ticketId, userId }));
 
 const seed = async () => {
 	const t0 = performance.now();
@@ -40,6 +48,7 @@ const seed = async () => {
 	await prisma.user.createMany({ data: users });
 	await prisma.account.createMany({ data: accounts });
 	await prisma.ticket.createMany({ data: tickets });
+	await prisma.comment.createMany({ data: comments });
 
 	const t1 = performance.now();
 	console.log(`Seeding finished. Took ${(t1 - t0).toFixed(2)} milliseconds.`);

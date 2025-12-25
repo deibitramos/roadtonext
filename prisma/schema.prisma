@@ -21,6 +21,7 @@ model User {
   sessions        Session[]
   accounts        Account[]
   tickets         Ticket[]
+  comments        Comment[]
 
   @@unique([email])
   @@unique([username])
@@ -86,6 +87,19 @@ model Ticket {
   bounty    Int
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  content   String   @db.VarChar(1024)
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticketId  String
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    String?
+  @@index([ticketId])
   @@index([userId])
 }
 
