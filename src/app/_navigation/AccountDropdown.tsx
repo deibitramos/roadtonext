@@ -10,10 +10,10 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import SignOutButton from '@/features/auth/components/SignOutButton';
-import { getSessionUser } from '@/lib/auth/session';
+import { getSessionUserOrRedirect } from '@/lib/auth/session';
 
 async function AccountDropdown() {
-	const user = await getSessionUser();
+	const user = await getSessionUserOrRedirect();
 	const initials = user.name
 		.split(' ')
 		.map((n) => n[0].toUpperCase())

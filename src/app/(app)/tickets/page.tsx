@@ -7,14 +7,14 @@ import Spinner from '@/components/Spinner';
 import TicketList from '@/features/ticket/components/TicketList';
 import TicketUpsertForm from '@/features/ticket/components/TicketUpsertForm';
 import { searchParamsCache } from '@/features/ticket/searchParams';
-import { getSessionUser } from '@/lib/auth/session';
+import { getSessionUserOrRedirect } from '@/lib/auth/session';
 
 type Props = {
 	searchParams: Promise<SearchParams>;
 };
 
 export default async function TicketsPage({ searchParams }: Props) {
-	const user = await getSessionUser();
+	const user = await getSessionUserOrRedirect();
 	const params = await searchParams;
 	return (
 		<div className="flex flex-1 flex-col gap-y-8">

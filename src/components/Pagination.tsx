@@ -6,13 +6,21 @@ type PageAndSize = {
 	size: number;
 };
 
+export type PaginationMetadata = {
+	count: number;
+	hasNextPage: boolean;
+	cursor?: number;
+};
+
+export type Paginated<T> = {
+	list: T[];
+	metadata: PaginationMetadata;
+};
+
 type Props = {
 	pagination: PageAndSize;
 	onPagination: (pagination: PageAndSize) => void;
-	metadata: {
-		count: number;
-		hasNextPage: boolean;
-	};
+	metadata: PaginationMetadata;
 };
 
 type SizeButtonProps = { size: string; onValueChange: (value: string) => void };

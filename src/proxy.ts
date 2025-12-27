@@ -12,6 +12,7 @@ export async function proxy(request: NextRequest) {
 	if (isApi) return NextResponse.next();
 
 	const session = getSessionCookie(request);
+	console.log('session', session, 'url', url);
 	const isPublicRoute = publicRoutes.includes(url);
 	const isAuthRoute = authRoutes.some((path) => url.startsWith(path));
 

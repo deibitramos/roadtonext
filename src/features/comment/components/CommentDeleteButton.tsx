@@ -8,9 +8,10 @@ import deleteComment from '../actions/deleteComment';
 
 type Props = {
 	id: string;
+	onDelete?: (id: string) => void;
 };
 
-function CommentDeleteButton({ id }: Props) {
+function CommentDeleteButton({ id, onDelete }: Props) {
 	const [open, setIsOpen] = useState(false);
 
 	const onClick = () => {
@@ -22,7 +23,12 @@ function CommentDeleteButton({ id }: Props) {
 			<Button variant="outline" size="icon" onClick={onClick}>
 				<TrashIcon className="size-4" />
 			</Button>
-			<ConfirmDialog open={open} onOpenChange={setIsOpen} action={deleteComment.bind(null, id)} />
+			<ConfirmDialog
+				open={open}
+				onOpenChange={setIsOpen}
+				action={deleteComment.bind(null, id)}
+				onSuccess={() => onDelete?.(id)}
+			/>
 		</>
 	);
 }

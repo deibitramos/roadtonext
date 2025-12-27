@@ -1,7 +1,6 @@
+import { Suspense } from 'react';
+import SkeletonLoader from '@/components/SkeletonLoader';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import isOwner from '@/features/auth/utils/isOwner';
-import Comments from '@/features/comment/components/Comments';
-import { getAuthSession } from '@/lib/auth/session';
 import { cn } from '@/lib/utils';
 import { toCurrencyFromCent } from '@/utils/currency';
 import { TICKET_STATUS } from '../constants';
@@ -13,12 +12,10 @@ import TicketMoreMenu from './TicketMoreMenu';
 type Props = {
 	ticket: TicketWithUser;
 	isDetail?: boolean;
+	children?: React.ReactNode;
 };
 
-async function TicketItem({ ticket, isDetail = false }: Props) {
-	const auth = await getAuthSession();
-	const isTicketOwner = isOwner(auth?.user, ticket);
-
+function TicketItem({ ticket, isDetail = false, children }: Props) {
 	return (
 		<div
 			className={cn('w-full flex flex-col gap-y-4', {
@@ -50,11 +47,11 @@ async function TicketItem({ ticket, isDetail = false }: Props) {
 				</Card>
 				<div className="flex flex-col gap-y-1">
 					{!isDetail && <GoToTicketButton id={ticket.id} />}
-					{isTicketOwner && <EditButton id={ticket.id} />}
-					{isTicketOwner && isDetail && <TicketMoreMenu ticket={ticket} />}
+					{ticket.owner && <EditButton id={ticket.id} />}
+					{ticket.owner && isDetail && <TicketMoreMenu ticket={ticket} />}
 				</div>
 			</div>
-			{isDetail ? <Comments ticketId={ticket.id} /> : null}
+			{isDetail ? <Suspense fallback={<SkeletonLoader />}>{children}</Suspense> : null}
 		</div>
 	);
 }

@@ -3,10 +3,8 @@ import { notFound } from 'next/navigation';
 import { type BreadcrumbData, Breadcrumbs } from '@/components/Breadcrumbs';
 import CardCompact from '@/components/CardCompact';
 import { Separator } from '@/components/ui/separator';
-import isOwner from '@/features/auth/utils/isOwner';
 import TicketUpsertForm from '@/features/ticket/components/TicketUpsertForm';
 import getTicket from '@/features/ticket/queries/getTicket';
-import { getSessionUser } from '@/lib/auth/session';
 
 type Props = {
 	params: Promise<{ ticketId: string }>;
@@ -14,10 +12,9 @@ type Props = {
 
 export default async function TicketEditPage({ params }: Props) {
 	const { ticketId } = await params;
-	const user = await getSessionUser();
 	const ticket = await getTicket(ticketId);
 
-	if (!ticket || !isOwner(user, ticket)) {
+	if (!ticket) {
 		notFound();
 	}
 

@@ -21,6 +21,7 @@ type Props = {
 	trigger?: ReactElement;
 	open?: boolean;
 	onOpenChange?: (value: boolean) => void;
+	onSuccess?: (actionState?: ActionState) => void;
 };
 
 function ConfirmDialog({
@@ -30,8 +31,15 @@ function ConfirmDialog({
 	description = 'This action cannot be undone.',
 	action,
 	trigger,
+	onSuccess,
 }: Props) {
 	const [actionState, newAction] = useActionState(action, EMPTY_ACTION_STATE);
+
+	const handleSuccess = () => {
+		onOpenChange?.(false);
+		onSuccess?.(actionState);
+	};
+
 	return (
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
 			{trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
@@ -43,7 +51,7 @@ function ConfirmDialog({
 				<AlertDialogFooter>
 					<AlertDialogCancel>Cancel</AlertDialogCancel>
 					<AlertDialogAction asChild>
-						<ActionForm action={newAction} actionState={actionState}>
+						<ActionForm action={newAction} actionState={actionState} onSuccess={handleSuccess}>
 							<Button type="submit">Confirm</Button>
 						</ActionForm>
 					</AlertDialogAction>

@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { type BreadcrumbData, Breadcrumbs } from '@/components/Breadcrumbs';
 import { Separator } from '@/components/ui/separator';
+import Comments from '@/features/comment/components/Comments';
+import getComments from '@/features/comment/queries/getComments';
 import TicketItem from '@/features/ticket/components/TicketItem';
 import getTicket from '@/features/ticket/queries/getTicket';
 
@@ -10,9 +12,12 @@ type Props = {
 	icon?: ReactElement;
 };
 
-export default async function TicketsPage({ params }: Props) {
+export default async function TicketPage({ params }: Props) {
 	const { ticketId } = await params;
-	const ticket = await getTicket(ticketId);
+	const [ticket, paginatedComments] = await Promise.all([
+		getTicket(ticketId),
+		getComments(ticketId),
+	]);
 
 	if (!ticket) {
 		notFound();
@@ -28,7 +33,9 @@ export default async function TicketsPage({ params }: Props) {
 			<Breadcrumbs breadcrumbs={breadcrumbData} />
 			<Separator />
 			<div className="flex justify-center animate-fade-from-top">
-				<TicketItem ticket={ticket} isDetail />
+				<TicketItem ticket={ticket} isDetail>
+					<Comments paginatedComments={paginatedComments} ticketId={ticket.id} key={ticket.id} />
+				</TicketItem>
 			</div>
 		</div>
 	);

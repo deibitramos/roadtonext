@@ -8,11 +8,18 @@ export const getAuthSession = cache(async () => {
 	return userSession;
 });
 
-export const getSessionUser = cache(async () => {
+export const getSessionUserOrRedirect = async () => {
 	const userSession = await getAuthSession();
-	if (!userSession) redirect(`/sign-in`);
+	if (!userSession) {
+		redirect(`/sign-in`);
+	}
 	return userSession.user;
-});
+};
+
+export const getSessionUserOrUndefined = async () => {
+	const userSession = await getAuthSession();
+	return userSession?.user;
+};
 
 export const isAuthenticated = async () => {
 	const userSession = await getAuthSession();

@@ -10,7 +10,7 @@ import {
 	toActionState,
 } from '@/components/form/utils/toActionState';
 import isOwner from '@/features/auth/utils/isOwner';
-import { getSessionUser } from '@/lib/auth/session';
+import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import prisma from '@/lib/prisma';
 import { toCent } from '@/utils/currency';
 
@@ -26,7 +26,7 @@ const upsertTicket = async (
 	_actionState: ActionState,
 	formData: FormData,
 ) => {
-	const user = await getSessionUser();
+	const user = await getSessionUserOrRedirect();
 
 	try {
 		if (!id) {
