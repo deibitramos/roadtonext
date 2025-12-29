@@ -6,19 +6,13 @@ import InputText from '@/components/form/fields/InputText';
 import useForm from '@/components/form/hooks/useForm';
 import SubmitButton from '@/components/form/SubmitButton';
 import forgotPasswordSchema from '@/features/auth/schemas/forgotPasswordSchema';
-import { requestPasswordReset } from '@/lib/auth/client';
+import resetPassword from '../actions/resetPassword';
 
 function PasswordForgotForm() {
 	const form = useForm(forgotPasswordSchema, {
 		submit: async ({ email }) => {
-			const { data, error } = await requestPasswordReset({ email, redirectTo: '' });
-			console.log(data);
-
-			if (error) {
-				toast.error(error.message);
-			} else {
-				toast.success(' Check your email for a reset link.');
-			}
+			resetPassword(email);
+			toast.success('If this email exists in our system, check it for the reset link.');
 		},
 	});
 

@@ -17,6 +17,7 @@ const deleteTicket = async (id: string) => {
 	revalidatePath('/tickets');
 
 	await setCookie('toast', 'Ticket deleted');
+
 	redirect('/tickets');
 };
 

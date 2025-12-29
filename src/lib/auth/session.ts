@@ -1,12 +1,20 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import type { NextRequest } from 'next/server';
 import { cache } from 'react';
 import { auth } from './server';
 
 export const getAuthSession = cache(async () => {
 	const userSession = await auth.api.getSession({ headers: await headers() });
+	auth.api.requestPasswordReset();
 	return userSession;
 });
+
+/* session from middleware shouldn't use cache */
+export const getMiddlewareSession = async (request: NextRequest) => {
+	const session = await auth.api.getSession({ headers: request.headers });
+	return session;
+};
 
 export const getSessionUserOrRedirect = async () => {
 	const userSession = await getAuthSession();

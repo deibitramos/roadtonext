@@ -1,8 +1,8 @@
-import { getSessionCookie } from 'better-auth/cookies';
 import { type NextRequest, NextResponse } from 'next/server';
+import { getMiddlewareSession } from '@/lib/auth/session';
 
 const apiPrefix = '/api';
-const authRoutes = ['/sign-in', '/sign-up', '/forgot-password'];
+const authRoutes = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password'];
 const publicRoutes = ['/'];
 const DEFAULT_LOGIN_REDIRECT = '/';
 
@@ -11,8 +11,7 @@ export async function proxy(request: NextRequest) {
 	const isApi = url.startsWith(apiPrefix);
 	if (isApi) return NextResponse.next();
 
-	const session = getSessionCookie(request);
-	console.log('session', session, 'url', url);
+	const session = await getMiddlewareSession(request);
 	const isPublicRoute = publicRoutes.includes(url);
 	const isAuthRoute = authRoutes.some((path) => url.startsWith(path));
 
