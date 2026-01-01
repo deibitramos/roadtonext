@@ -11,13 +11,19 @@ import signInSchema from '../schemas/signInSchema';
 
 function SignInForm() {
 	const form = useForm(signInSchema, {
-		submit: async (data) => {
-			const response = await signIn.email(data);
+		submit: async (signInData) => {
+			const { data, error } = await signIn.email(signInData);
 
-			if (response.error) {
-				toast.error(response.error.message);
+			if (error) {
+				toast.error(error.message);
 			} else {
-				redirect('/tickets');
+				// Check if email is verified
+				if (!data.user.emailVerified) {
+					toast.info('Please verify your email to continue');
+					redirect('/email-verify');
+				} else {
+					redirect('/tickets');
+				}
 			}
 		},
 	});
