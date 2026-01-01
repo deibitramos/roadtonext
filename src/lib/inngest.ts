@@ -1,13 +1,8 @@
 import { EventSchemas, Inngest } from 'inngest';
 
-type PasswordResetEvent = {
-	data: {
-		email: string;
-	};
-};
-
 type Events = {
-	'app/password.password-reset': PasswordResetEvent;
+	'app/password.password-reset': { data: { email: string; url: string } };
+	'app/auth.sign-up': { data: { email: string; otp: string } };
 };
 
 const inngest = new Inngest({

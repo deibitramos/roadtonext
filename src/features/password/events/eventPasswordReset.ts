@@ -1,18 +1,21 @@
-import { auth } from '@/lib/auth/server';
 import inngest from '@/lib/inngest';
+import prisma from '@/lib/prisma';
+import sendPasswordReset from '../emails/sendPasswordReset';
 
-const passwordResetEvent = inngest.createFunction(
+const eventPasswordReset = inngest.createFunction(
 	{ id: 'password-reset' },
 	{ event: 'app/password.password-reset' },
 	async ({ event }) => {
-		const { email } = event.data;
-		console.log('Received password reset event for email:', email);
-		const redirectTo = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password`;
-		console.log('Redirect URL:', redirectTo);
-		const result = await auth.api.requestPasswordReset({ body: { email, redirectTo } });
-		console.log('result', result);
+		const { email, url } = event.data;
+
+		const user = await prisma.user.findUnique({ where: { email } });
+		if (!user) return;
+
+		// When calling from server, url doesn't come complete
+		// const fullUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth${url}`;
+		const result = await sendPasswordReset({ email: user.email, name: user.name, url });
 		return { event, body: result };
 	},
 );
 
-export default passwordResetEvent;
+export default eventPasswordReset;

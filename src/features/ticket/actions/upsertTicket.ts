@@ -29,7 +29,7 @@ const upsertTicket = async (
 	const user = await getSessionUserOrRedirect();
 
 	try {
-		if (!id) {
+		if (id) {
 			const ticket = await prisma.ticket.findUnique({ where: { id } });
 			if (!ticket || !isOwner(user, ticket)) return toActionState('Not authorized', 'ERROR');
 		}

@@ -17,8 +17,9 @@ function SignUpForm() {
 			if (response.error) {
 				toast.error(response.error.message);
 			} else {
-				toast.success('Account created successfully');
-				redirect('/tickets');
+				toast.success('Account created! Please check your email for verification code.');
+				// User is now authenticated (but unverified), redirect to verification page
+				redirect('/email-verify');
 			}
 		},
 	});

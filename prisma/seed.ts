@@ -12,7 +12,7 @@ const TODAY_DATE = new Date().toISOString().split('T')[0];
 
 const users = [
 	['admin-id', 'Admin', 'admin@admin.com', true] as const,
-	['user-id', 'User', 'davidramos.13@outlook.com', true] as const,
+	['user-id', 'User', 'davidramos.13@outlook.com', false] as const,
 ].map(([id, name, email, emailVerified]) => ({ id, name, email, emailVerified }));
 
 const accounts = [
