@@ -1,33 +1,49 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import type { NextRequest } from 'next/server';
+import { cache } from 'react';
+import hasMembership from '@/features/organization/queries/hasMembership';
 import { auth } from './server';
 
-export const getAuthSession = async () => {
+export const getAuthSession = cache(async () => {
 	const userSession = await auth.api.getSession({ headers: await headers() });
 	return userSession;
+});
+
+export type SessionOptions = {
+	skipEmailVerification?: boolean;
+	skipOrganizationCheck?: boolean;
 };
 
-/* session from middleware shouldn't use cache */
-export const getMiddlewareSession = async (request: NextRequest) => {
-	const session = await auth.api.getSession({ headers: request.headers });
-	return session;
-};
-
-export const getSessionUserOrRedirect = async () => {
+export const getSessionUserOrRedirect = cache(async (options?: SessionOptions) => {
 	const userSession = await getAuthSession();
+
 	if (!userSession) {
 		redirect('/sign-in');
 	}
-	return userSession.user;
-};
 
-export const getSessionUserOrUndefined = async () => {
+	if (!options?.skipEmailVerification && !userSession.user.emailVerified) {
+		redirect('/email-verify');
+	}
+
+	if (!options?.skipOrganizationCheck) {
+		const membership = await hasMembership(userSession.user.id);
+		if (!membership) redirect('/onboarding');
+	}
+
+	return userSession.user;
+});
+
+export const getSessionUserOrUndefined = cache(async () => {
 	const userSession = await getAuthSession();
 	return userSession?.user;
-};
+});
 
-export const isAuthenticated = async () => {
+export const isAuthenticated = cache(async () => {
 	const userSession = await getAuthSession();
 	return !!userSession;
-};
+});
+
+export const redirectIfAuthenticated = cache(async () => {
+	const session = await getAuthSession();
+	if (session) redirect('/tickets');
+});

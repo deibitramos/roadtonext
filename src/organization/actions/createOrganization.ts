@@ -12,7 +12,7 @@ const createOrganizationSchema = z.object({
 });
 
 const createOrganization = async (_actionState: ActionState, formData: FormData) => {
-	const user = await getSessionUserOrRedirect();
+	const user = await getSessionUserOrRedirect({ skipOrganizationCheck: true });
 
 	try {
 		const data = createOrganizationSchema.parse({

@@ -6,8 +6,11 @@ import { auth } from '@/lib/auth/server';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
 
 const verifyEmail = async (otp: string) => {
-	// Get user from session without checking email verification
-	const user = await getSessionUserOrRedirect();
+	// Get user from session without checking email verification or organization
+	const user = await getSessionUserOrRedirect({
+		skipEmailVerification: true,
+		skipOrganizationCheck: true,
+	});
 
 	// Verify email using Better Auth API
 	const result = await auth.api.verifyEmailOTP({

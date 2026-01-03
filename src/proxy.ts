@@ -1,34 +1,21 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { getMiddlewareSession } from '@/lib/auth/session';
-import hasOneOrganization from './features/organization/queries/hasOneOrganization';
 
 const authRoutes = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password'];
 const publicRoutes = ['/'];
 
+// Better Auth session cookie name
+const SESSION_COOKIE = 'better-auth.session_token';
+
 export async function proxy(request: NextRequest) {
 	const url = request.nextUrl.pathname;
 
-	// Skip public routes (only Home for now)
-	if (publicRoutes.includes(url)) return NextResponse.next();
+	if (publicRoutes.includes(url) || authRoutes.some((path) => url.startsWith(path)))
+		return NextResponse.next();
 
-	const session = await getMiddlewareSession(request);
+	const hasSessionCookie = !!request.cookies.get(SESSION_COOKIE)?.value;
+	if (!hasSessionCookie) return NextResponse.redirect(new URL('/sign-in', request.url));
 
-	// Auth routes: redirect authenticated users to tickets page, allow unauthenticated users
-	if (authRoutes.some((path) => url.startsWith(path)))
-		return session ? NextResponse.redirect(new URL('/tickets', request.url)) : NextResponse.next();
-
-	// Require authentication for all other routes
-	if (!session) return NextResponse.redirect(new URL('/sign-in', request.url));
-
-	// Require email email verification (excluding email-verify route)
-	if (url.startsWith('/email-verify')) return NextResponse.next();
-	if (!session.user.emailVerified)
-		return NextResponse.redirect(new URL('/email-verify', request.url));
-
-	// Require at least one organization (excluding onboarding route)
-	if (url.startsWith('/onboarding')) return NextResponse.next();
-	const hasOrg = await hasOneOrganization(session.user.id);
-	return hasOrg ? NextResponse.next() : NextResponse.redirect(new URL('/onboarding', request.url));
+	return NextResponse.next();
 }
 
 export const config = {

@@ -1,6 +1,7 @@
 import Link from 'next/dist/client/link';
 import CardCompact from '@/components/CardCompact';
 import SignInForm from '@/features/auth/components/SignInForm';
+import { redirectIfAuthenticated } from '@/lib/auth/session';
 
 const LoginFooter = (
 	<>
@@ -13,7 +14,9 @@ const LoginFooter = (
 	</>
 );
 
-export default function SignInPage() {
+export default async function SignInPage() {
+	await redirectIfAuthenticated();
+
 	return (
 		<div className="flex flex-1 flex-col justify-center items-center">
 			<CardCompact
