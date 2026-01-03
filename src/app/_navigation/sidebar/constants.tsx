@@ -1,9 +1,9 @@
-import { BookIcon, CircleUserIcon, LibraryIcon } from 'lucide-react';
+import { BookIcon, CircleUserIcon, LibraryIcon, UsersIcon } from 'lucide-react';
 import type { NavItem } from './types';
 
 const items = [
-	['All Tickets', LibraryIcon, '/', false],
-	['My Tickets', BookIcon, '/tickets', false],
+	['All Tickets', LibraryIcon, '/'],
+	['My Tickets', BookIcon, '/tickets'],
 	[
 		'Account',
 		CircleUserIcon,
@@ -11,9 +11,10 @@ const items = [
 		true,
 		(path: string) => path.startsWith('/account'),
 	],
+	['Organization', UsersIcon, '/organization'],
 ] as const;
 
-export const navItems: NavItem[] = items.map(([title, Icon, href, separator, matches]) => ({
+export const navItems: NavItem[] = items.map(([title, Icon, href, separator = false, matches]) => ({
 	...{ title, href, Icon, separator, matches },
 }));
 

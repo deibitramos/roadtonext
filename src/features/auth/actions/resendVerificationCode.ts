@@ -5,7 +5,7 @@ import { getSessionUserOrRedirect } from '@/lib/auth/session';
 
 const resendVerificationCode = async () => {
 	console.log('resending');
-	const user = await getSessionUserOrRedirect({ checkEmailVerified: false });
+	const user = await getSessionUserOrRedirect();
 	console.log('user', user);
 
 	// Send verification OTP using Better Auth API

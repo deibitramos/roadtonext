@@ -2,10 +2,13 @@
 
 import { LogOutIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
 import { signOut } from '@/lib/auth/client';
+import { cn } from '@/lib/utils';
 
 function SignOutButton() {
 	const router = useRouter();
+	const [isPending, startTransition] = useTransition();
 
 	const onSignOutSuccess = () => {
 		router.push('/');
@@ -13,16 +16,25 @@ function SignOutButton() {
 	};
 
 	const onClick = async () => {
-		await signOut({ fetchOptions: { onSuccess: onSignOutSuccess } });
+		if (isPending) return;
+		startTransition(async () => {
+			await signOut({ fetchOptions: { onSuccess: onSignOutSuccess } });
+		});
 	};
 
 	return (
-		<>
+		<button
+			type="button"
+			onClick={onClick}
+			disabled={isPending}
+			className={cn(
+				'w-full text-left flex items-center',
+				isPending && 'opacity-50 cursor-not-allowed',
+			)}
+		>
 			<LogOutIcon className="mr-2 size-4" />
-			<button type="button" onClick={onClick}>
-				Sign out
-			</button>
-		</>
+			Sign out
+		</button>
 	);
 }
 

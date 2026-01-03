@@ -1,49 +1,34 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getMiddlewareSession } from '@/lib/auth/session';
+import hasOneOrganization from './features/organization/queries/hasOneOrganization';
 
-const apiPrefix = '/api';
 const authRoutes = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password'];
 const publicRoutes = ['/'];
-const emailVerifyRoute = '/email-verify';
-const DEFAULT_LOGIN_REDIRECT = '/';
 
 export async function proxy(request: NextRequest) {
 	const url = request.nextUrl.pathname;
-	const isApi = url.startsWith(apiPrefix);
-	if (isApi) return NextResponse.next();
+
+	// Skip public routes (only Home for now)
+	if (publicRoutes.includes(url)) return NextResponse.next();
 
 	const session = await getMiddlewareSession(request);
-	const isPublicRoute = publicRoutes.includes(url);
-	const isAuthRoute = authRoutes.some((path) => url.startsWith(path));
-	const isEmailVerifyRoute = url.startsWith(emailVerifyRoute);
 
-	// Auth routes: redirect authenticated users home, allow unauthenticated users
-	if (isAuthRoute) {
-		if (session) {
-			return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, request.url));
-		}
-		return NextResponse.next();
-	}
+	// Auth routes: redirect authenticated users to tickets page, allow unauthenticated users
+	if (authRoutes.some((path) => url.startsWith(path)))
+		return session ? NextResponse.redirect(new URL('/tickets', request.url)) : NextResponse.next();
 
-	// Email verify route: requires authentication but allows unverified users
-	if (isEmailVerifyRoute) {
-		if (!session) {
-			return NextResponse.redirect(new URL('/sign-in', request.url));
-		}
-		return NextResponse.next();
-	}
+	// Require authentication for all other routes
+	if (!session) return NextResponse.redirect(new URL('/sign-in', request.url));
 
-	// All other routes: require authentication
-	if (!session && !isPublicRoute) {
-		return NextResponse.redirect(new URL('/sign-in', request.url));
-	}
+	// Require email email verification (excluding email-verify route)
+	if (url.startsWith('/email-verify')) return NextResponse.next();
+	if (!session.user.emailVerified)
+		return NextResponse.redirect(new URL('/email-verify', request.url));
 
-	// Protected routes: require email verification (excluding public and email-verify routes)
-	if (session && !session.user.emailVerified && !isPublicRoute) {
-		return NextResponse.redirect(new URL(emailVerifyRoute, request.url));
-	}
-
-	return NextResponse.next();
+	// Require at least one organization (excluding onboarding route)
+	if (url.startsWith('/onboarding')) return NextResponse.next();
+	const hasOrg = await hasOneOrganization(session.user.id);
+	return hasOrg ? NextResponse.next() : NextResponse.redirect(new URL('/onboarding', request.url));
 }
 
 export const config = {
@@ -53,8 +38,9 @@ export const config = {
 		 * - _next/static (static files)
 		 * - _next/image (image optimization files)
 		 * - favicon.ico (favicon file)
+		 * - api (API routes)
 		 * Feel free to modify this pattern to include more paths.
 		 */
-		'/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+		'/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
 	],
 };
