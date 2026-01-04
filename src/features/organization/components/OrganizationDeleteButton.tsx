@@ -4,29 +4,26 @@ import { TrashIcon } from 'lucide-react';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import useModal from '@/components/hooks/useModal';
 import { Button } from '@/components/ui/button';
-import deleteComment from '../actions/deleteComment';
+import deleteOrganization from '@/organization/actions/deleteOrganization';
 
 type Props = {
-	id: string;
-	onDelete?: (id: string) => void;
+	organizationId: string;
 };
 
-function CommentDeleteButton({ id, onDelete }: Props) {
+function OrganizationDeleteButton({ organizationId }: Props) {
 	const [open, openModal, closeModal] = useModal();
-
 	return (
 		<>
-			<Button variant="outline" size="icon" onClick={openModal}>
+			<Button variant="destructive" onClick={openModal}>
 				<TrashIcon className="size-4" />
 			</Button>
 			<ConfirmDialog
 				open={open}
 				closeModal={closeModal}
-				action={deleteComment.bind(null, id)}
-				onSuccess={() => onDelete?.(id)}
+				action={deleteOrganization.bind(null, organizationId)}
 			/>
 		</>
 	);
 }
 
-export default CommentDeleteButton;
+export default OrganizationDeleteButton;

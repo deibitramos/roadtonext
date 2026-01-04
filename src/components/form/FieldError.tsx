@@ -1,11 +1,11 @@
 import type { ActionState } from './utils/toActionState';
 
-type Props = {
-	actionState: ActionState;
+type Props<T> = {
+	actionState: ActionState<T>;
 	name: string;
 };
 
-function FieldError({ actionState, name }: Props) {
+function FieldError<T>({ actionState, name }: Props<T>) {
 	const message = actionState.fieldErrors?.[name];
 	if (!message) return null;
 

@@ -13,7 +13,12 @@ import SignOutButton from '@/features/auth/components/SignOutButton';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
 
 async function AccountDropdown() {
-	const user = await getSessionUserOrRedirect();
+	// Skip organization check since this component is in layout that includes /onboarding
+	const user = await getSessionUserOrRedirect({
+		skipOrganizationCheck: true,
+		skipActiveOrganizationCheck: true,
+	});
+
 	const initials = user.name
 		.split(' ')
 		.map((n) => n[0].toUpperCase())

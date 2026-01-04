@@ -1,45 +1,59 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import type { NextRequest } from 'next/server';
 import { cache } from 'react';
+import hasMembership from '@/features/organization/queries/hasMembership';
 import { auth } from './server';
-
-export type SessionOptions = {
-	checkEmailVerified?: boolean;
-};
 
 export const getAuthSession = cache(async () => {
 	const userSession = await auth.api.getSession({ headers: await headers() });
 	return userSession;
 });
 
-/* session from middleware shouldn't use cache */
-export const getMiddlewareSession = async (request: NextRequest) => {
-	const session = await auth.api.getSession({ headers: request.headers });
-	return session;
+export type SessionOptions = {
+	skipEmailVerification?: boolean;
+	skipOrganizationCheck?: boolean;
+	skipActiveOrganizationCheck?: boolean;
 };
 
-export const getSessionUserOrRedirect = async (options: SessionOptions = {}) => {
-	const { checkEmailVerified = true } = options;
+export const getSessionUserOrRedirect = cache(async (options?: SessionOptions) => {
 	const userSession = await getAuthSession();
+
 	if (!userSession) {
 		redirect('/sign-in');
 	}
-	// Redirect unverified users to verification page (unless checkEmailVerified is false).
-	// Pass { checkEmailVerified: false } when you need the user but don't want to redirect
-	// unverified users (e.g., on the email-verify page itself or in server actions).
-	if (checkEmailVerified && !userSession.user.emailVerified) {
+
+	if (!options?.skipEmailVerification && !userSession.user.emailVerified) {
 		redirect('/email-verify');
 	}
-	return userSession.user;
-};
 
-export const getSessionUserOrUndefined = async () => {
+	if (!options?.skipOrganizationCheck || !options?.skipActiveOrganizationCheck) {
+		const membership = await hasMembership(userSession.user.id);
+		if (!options?.skipOrganizationCheck && !membership.hasMembership) redirect('/onboarding');
+		if (!options?.skipActiveOrganizationCheck && !membership.isActive)
+			redirect('/onboarding/select-active');
+	}
+
+	return userSession.user;
+});
+
+export const getSessionUserOrUndefined = cache(async () => {
 	const userSession = await getAuthSession();
 	return userSession?.user;
-};
+});
 
-export const isAuthenticated = async () => {
+export const isAuthenticated = cache(async () => {
 	const userSession = await getAuthSession();
 	return !!userSession;
-};
+});
+
+export const redirectIfAuthenticated = cache(async () => {
+	const session = await getAuthSession();
+	if (session) redirect('/tickets');
+});
+
+export const redirectIfHasActiveOrganization = cache(async () => {
+	const session = await getAuthSession();
+	if (!session?.user) return;
+	const membership = await hasMembership(session.user.id);
+	if (membership.isActive) redirect('/organization');
+});

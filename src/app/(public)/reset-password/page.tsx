@@ -2,12 +2,14 @@ import { ShieldAlertIcon } from 'lucide-react';
 import CardCompact from '@/components/CardCompact';
 import Placeholder from '@/components/Placeholder';
 import ResetPasswordForm from '@/features/password/components/ResetPasswordForm';
+import { redirectIfAuthenticated } from '@/lib/auth/session';
 
 type Props = {
 	searchParams: Promise<{ token?: string; error?: string }>;
 };
 
 export default async function ResetPasswordPage({ searchParams }: Props) {
+	await redirectIfAuthenticated();
 	const params = await searchParams;
 	const { token, error } = params;
 

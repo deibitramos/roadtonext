@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import CardCompact from '@/components/CardCompact';
 import SignUpForm from '@/features/auth/components/SignUpForm';
+import { redirectIfAuthenticated } from '@/lib/auth/session';
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+	await redirectIfAuthenticated();
+
 	return (
 		<div className="flex flex-1 flex-col justify-center items-center">
 			<CardCompact

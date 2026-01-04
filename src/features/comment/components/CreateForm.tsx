@@ -1,7 +1,6 @@
 'use client';
 
 import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
 import ActionForm from '@/components/form/ActionForm';
 import FieldError from '@/components/form/FieldError';
 import SubmitButton from '@/components/form/SubmitButton';
@@ -20,7 +19,6 @@ function CreateForm({ ticketId, onCreate }: Props) {
 		createComment.bind(null, ticketId),
 		EMPTY_ACTION_STATE as ActionState<CommentWithUser>,
 	);
-	const { pending } = useFormStatus();
 
 	const handleSuccess = (actionState: ActionState<CommentWithUser>) => {
 		onCreate?.(actionState.data);
@@ -30,7 +28,7 @@ function CreateForm({ ticketId, onCreate }: Props) {
 		<ActionForm action={action} actionState={actionState} onSuccess={handleSuccess}>
 			<Textarea name="content" placeholder="What's on your mind?" />
 			<FieldError actionState={actionState} name="content" />
-			<SubmitButton isSubmitting={pending}>Comment</SubmitButton>
+			<SubmitButton>Comment</SubmitButton>
 		</ActionForm>
 	);
 }
