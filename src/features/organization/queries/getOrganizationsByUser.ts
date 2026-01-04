@@ -1,8 +1,10 @@
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import prisma from '@/lib/prisma';
 
-const getOrganizationsByUser = async () => {
-	const user = await getSessionUserOrRedirect();
+const getOrganizationsByUser = async (protect: boolean) => {
+	const user = await getSessionUserOrRedirect(
+		protect ? undefined : { skipOrganizationCheck: true, skipActiveOrganizationCheck: true },
+	);
 
 	const organizations = await prisma.organization.findMany({
 		where: { memberships: { some: { userId: user.id } } },
@@ -10,6 +12,7 @@ const getOrganizationsByUser = async () => {
 			memberships: { where: { userId: user.id } },
 			_count: { select: { memberships: true } },
 		},
+		orderBy: { name: 'asc' },
 	});
 
 	return organizations.map(({ memberships, ...organization }) => ({

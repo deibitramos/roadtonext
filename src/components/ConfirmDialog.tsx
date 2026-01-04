@@ -1,5 +1,6 @@
-import { type ReactElement, useActionState } from 'react';
-import ActionForm from './form/ActionForm';
+import { type ReactElement, useActionState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import useActionFeedback from './form/hooks/useActionFeedback';
 import { type ActionState, EMPTY_ACTION_STATE } from './form/utils/toActionState';
 import {
 	AlertDialog,
@@ -14,34 +15,63 @@ import {
 } from './ui/alert-dialog';
 import { Button } from './ui/button';
 
-type Props = {
+type Props<T> = {
 	title?: string;
 	description?: string;
-	action: () => Promise<ActionState>;
+	action: () => Promise<ActionState<T>>;
 	trigger?: ReactElement;
 	open?: boolean;
-	onOpenChange?: (value: boolean) => void;
-	onSuccess?: (actionState?: ActionState) => void;
+	closeModal: () => void;
+	onSuccess?: (actionState?: ActionState<T>) => void;
 };
 
-function ConfirmDialog({
+function ConfirmDialog<T = never>({
 	open = false,
-	onOpenChange,
+	closeModal,
 	title = 'Are you absolutely sure?',
 	description = 'This action cannot be undone.',
 	action,
 	trigger,
 	onSuccess,
-}: Props) {
-	const [actionState, newAction] = useActionState(action, EMPTY_ACTION_STATE);
+}: Props<T>) {
+	const [actionState, newAction, isPending] = useActionState(action, EMPTY_ACTION_STATE);
 
 	const handleSuccess = () => {
-		onOpenChange?.(false);
+		closeModal();
 		onSuccess?.(actionState);
 	};
 
+	const toastRef = useRef<string | number | null>(null);
+
+	useEffect(() => {
+		if (isPending) {
+			toastRef.current = toast.loading('Deleting ...');
+		} else if (toastRef.current) {
+			toast.dismiss(toastRef.current);
+		}
+
+		return () => {
+			if (toastRef.current) {
+				toast.dismiss(toastRef.current);
+			}
+		};
+	}, [isPending]);
+
+	useActionFeedback(actionState, {
+		onSuccess: ({ actionState }) => {
+			console.log('ActionForm onSuccess', actionState);
+			if (!actionState.message) return;
+			toast.success(actionState.message);
+			handleSuccess();
+		},
+		onError: ({ actionState }) => {
+			if (!actionState.message) return;
+			toast.error(actionState.message);
+		},
+	});
+
 	return (
-		<AlertDialog open={open} onOpenChange={onOpenChange}>
+		<AlertDialog open={open} onOpenChange={closeModal}>
 			{trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
 			<AlertDialogContent>
 				<AlertDialogHeader>
@@ -51,9 +81,9 @@ function ConfirmDialog({
 				<AlertDialogFooter>
 					<AlertDialogCancel>Cancel</AlertDialogCancel>
 					<AlertDialogAction asChild>
-						<ActionForm action={newAction} actionState={actionState} onSuccess={handleSuccess}>
+						<form action={newAction}>
 							<Button type="submit">Confirm</Button>
-						</ActionForm>
+						</form>
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

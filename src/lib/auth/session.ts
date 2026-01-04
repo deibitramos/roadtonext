@@ -12,6 +12,7 @@ export const getAuthSession = cache(async () => {
 export type SessionOptions = {
 	skipEmailVerification?: boolean;
 	skipOrganizationCheck?: boolean;
+	skipActiveOrganizationCheck?: boolean;
 };
 
 export const getSessionUserOrRedirect = cache(async (options?: SessionOptions) => {
@@ -25,9 +26,11 @@ export const getSessionUserOrRedirect = cache(async (options?: SessionOptions) =
 		redirect('/email-verify');
 	}
 
-	if (!options?.skipOrganizationCheck) {
+	if (!options?.skipOrganizationCheck || !options?.skipActiveOrganizationCheck) {
 		const membership = await hasMembership(userSession.user.id);
-		if (!membership) redirect('/onboarding');
+		if (!options?.skipOrganizationCheck && !membership.hasMembership) redirect('/onboarding');
+		if (!options?.skipActiveOrganizationCheck && !membership.isActive)
+			redirect('/onboarding/select-active');
 	}
 
 	return userSession.user;
@@ -46,4 +49,11 @@ export const isAuthenticated = cache(async () => {
 export const redirectIfAuthenticated = cache(async () => {
 	const session = await getAuthSession();
 	if (session) redirect('/tickets');
+});
+
+export const redirectIfHasActiveOrganization = cache(async () => {
+	const session = await getAuthSession();
+	if (!session?.user) return;
+	const membership = await hasMembership(session.user.id);
+	if (membership.isActive) redirect('/organization');
 });

@@ -5,7 +5,7 @@ import { PrismaClient } from '@/generated/prisma/client';
 const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL });
 const prisma = new PrismaClient({ adapter });
 
-const ASDASD =
+const TESTPWD =
 	'244e9f59dd921ab735f56d94964dddc6:b2d8bf9eb91adcb5ce3ae3dbc0403afcefa30a77dc10954b7d979cbb1b13bf78dd575c619447a73c85c8b5389728cfdf3257895917d131f4ed780324e4c52c95';
 
 const TODAY_DATE = new Date().toISOString().split('T')[0];
@@ -20,12 +20,12 @@ const users = [
 ].map(([id, name, email, emailVerified]) => ({ id, name, email, emailVerified }));
 
 const accounts = [
-	['admin-acc-id', 'credential', 'admin-id', ASDASD] as const,
-	['user-acc-id', 'credential', 'user-id', ASDASD] as const,
-	['alice-acc-id', 'credential', 'alice-id', ASDASD] as const,
-	['bob-acc-id', 'credential', 'bob-id', ASDASD] as const,
-	['charlie-acc-id', 'credential', 'charlie-id', ASDASD] as const,
-	['jose-acc-id', 'credential', 'jose-id', ASDASD] as const,
+	['admin-acc-id', 'credential', 'admin-id', TESTPWD] as const,
+	['user-acc-id', 'credential', 'user-id', TESTPWD] as const,
+	['alice-acc-id', 'credential', 'alice-id', TESTPWD] as const,
+	['bob-acc-id', 'credential', 'bob-id', TESTPWD] as const,
+	['charlie-acc-id', 'credential', 'charlie-id', TESTPWD] as const,
+	['jose-acc-id', 'credential', 'jose-id', TESTPWD] as const,
 ].map(([id, providerId, userId, password]) => {
 	return { id, accountId: id, providerId, userId, password };
 });
@@ -36,16 +36,16 @@ const organizations = [
 ].map(([id, name]) => ({ id, name }));
 
 const memberships = [
-	['admin-id', 'org-1-id', 172800] as const, // Admin in Acme
-	['admin-id', 'org-2-id', 86400] as const, // Admin in Tech Innovators
-	['user-id', 'org-1-id', 86400] as const, // User in Acme
-	['alice-id', 'org-1-id', 43200] as const, // Alice in Acme
-	['alice-id', 'org-2-id', 21600] as const, // Alice in Tech Innovators
-	['bob-id', 'org-2-id', 43200] as const, // Bob in Tech Innovators
-	['charlie-id', 'org-1-id', 7200] as const, // Charlie in Acme
-].map(([userId, organizationId, secondsAgo]) => ({
+	['admin-id', 'org-1-id', 172800, true] as const, // Admin in Acme (active)
+	['admin-id', 'org-2-id', 86400, false] as const, // Admin in Tech Innovators (inactive)
+	['user-id', 'org-1-id', 86400, true] as const, // User in Acme (active)
+	['alice-id', 'org-1-id', 43200, true] as const, // Alice in Acme (active)
+	['alice-id', 'org-2-id', 21600, false] as const, // Alice in Tech Innovators (inactive)
+	['bob-id', 'org-2-id', 43200, true] as const, // Bob in Tech Innovators (active)
+	['charlie-id', 'org-1-id', 7200, true] as const, // Charlie in Acme (active)
+].map(([userId, organizationId, secondsAgo, isActive]) => ({
 	...{ userId, organizationId },
-	joinedAt: new Date(Date.now() - secondsAgo * 1000),
+	...{ joinedAt: new Date(Date.now() - secondsAgo * 1000), isActive },
 }));
 
 const tickets = [

@@ -10,6 +10,7 @@ const verifyEmail = async (otp: string) => {
 	const user = await getSessionUserOrRedirect({
 		skipEmailVerification: true,
 		skipOrganizationCheck: true,
+		skipActiveOrganizationCheck: true,
 	});
 
 	// Verify email using Better Auth API

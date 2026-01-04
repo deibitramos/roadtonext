@@ -1,7 +1,6 @@
 'use client';
 
 import { useActionState, useRef } from 'react';
-import { useFormStatus } from 'react-dom';
 import { DatePicker, type DatePickerImperativeHandle } from '@/components/DatePicker';
 import ActionForm from '@/components/form/ActionForm';
 import FieldError from '@/components/form/FieldError';
@@ -23,7 +22,6 @@ function TicketUpsertForm({ ticket }: Props) {
 		upsertTicket.bind(null, ticket?.id),
 		EMPTY_ACTION_STATE,
 	);
-	const { pending } = useFormStatus();
 
 	const datePickerImperativeHandleRef = useRef<DatePickerImperativeHandle>(null);
 
@@ -78,7 +76,7 @@ function TicketUpsertForm({ ticket }: Props) {
 				</div>
 			</div>
 
-			<SubmitButton isSubmitting={pending}>{ticket ? 'Update' : 'Create'}</SubmitButton>
+			<SubmitButton>{ticket ? 'Update' : 'Create'}</SubmitButton>
 		</ActionForm>
 	);
 }

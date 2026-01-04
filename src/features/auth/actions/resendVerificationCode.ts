@@ -8,6 +8,7 @@ const resendVerificationCode = async () => {
 	const user = await getSessionUserOrRedirect({
 		skipEmailVerification: true,
 		skipOrganizationCheck: true,
+		skipActiveOrganizationCheck: true,
 	});
 	console.log('user', user);
 

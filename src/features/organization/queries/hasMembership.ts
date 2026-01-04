@@ -1,12 +1,9 @@
+import { cache } from 'react';
 import prisma from '@/lib/prisma';
 
-const hasMembership = async (userId: string) => {
-	const membership = await prisma.membership.findFirst({
-		where: { userId },
-		select: { userId: true },
-	});
-
-	return membership !== null;
-};
+const hasMembership = cache(async (userId: string) => {
+	const memberships = await prisma.membership.findMany({ where: { userId } });
+	return { hasMembership: memberships.length > 0, isActive: memberships.some((m) => m.isActive) };
+});
 
 export default hasMembership;

@@ -1,9 +1,9 @@
 'use client';
 
 import { MoreVerticalIcon, TrashIcon } from 'lucide-react';
-import { useState } from 'react';
 import { toast } from 'sonner';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import useModal from '@/components/hooks/useModal';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
@@ -25,7 +25,7 @@ type Props = {
 };
 
 function TicketMoreMenu({ ticket }: Props) {
-	const [open, setIsOpen] = useState(false);
+	const [open, openModal, closeModal] = useModal();
 
 	const onUpdateStatus = async (value: string) => {
 		const promise = updateTicketStatus(ticket.id, value as typeof ticket.status);
@@ -37,10 +37,6 @@ function TicketMoreMenu({ ticket }: Props) {
 			return;
 		}
 		toast.success(result.message);
-	};
-
-	const onSelectDelete = () => {
-		setIsOpen(true);
 	};
 
 	return (
@@ -60,7 +56,7 @@ function TicketMoreMenu({ ticket }: Props) {
 						))}
 					</DropdownMenuRadioGroup>
 					<DropdownMenuSeparator />
-					<DropdownMenuItem onSelect={onSelectDelete}>
+					<DropdownMenuItem onSelect={openModal}>
 						<TrashIcon className="h-4 w-4" />
 						<span>Delete</span>
 					</DropdownMenuItem>
@@ -68,7 +64,7 @@ function TicketMoreMenu({ ticket }: Props) {
 			</DropdownMenu>
 			<ConfirmDialog
 				open={open}
-				onOpenChange={setIsOpen}
+				closeModal={closeModal}
 				action={deleteTicket.bind(null, ticket.id)}
 			/>
 		</>
