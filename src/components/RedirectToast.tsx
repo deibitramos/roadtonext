@@ -1,25 +1,13 @@
-'use client';
+import { cookies } from 'next/headers';
+import ToastTrigger from './ToastTrigger';
 
-import { usePathname } from 'next/navigation';
-import { useEffect } from 'react';
-import { toast } from 'sonner';
-import { consumeCookie, deleteCookie } from '@/actions/cookies';
+async function RedirectToast() {
+	const cookieStore = await cookies();
+	const message = cookieStore.get('toast')?.value;
 
-function RedirectToast() {
-	const pathname = usePathname();
+	if (!message) return null;
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: required
-	useEffect(() => {
-		const showCookieToast = async () => {
-			const message = await consumeCookie('toast');
-			if (message) {
-				toast.success(message);
-				await deleteCookie('toast');
-			}
-		};
-		showCookieToast();
-	}, [pathname]);
-	return null;
+	return <ToastTrigger message={message} />;
 }
 
 export default RedirectToast;

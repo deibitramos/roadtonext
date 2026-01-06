@@ -6,7 +6,7 @@ import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import prisma from '@/lib/prisma';
 
 const switchOrganization = async (organizationId: string) => {
-	const user = await getSessionUserOrRedirect({ skipActiveOrganizationCheck: true });
+	const user = await getSessionUserOrRedirect({ skipActiveOrgCheck: true });
 
 	try {
 		const membership = await prisma.membership.findFirst({

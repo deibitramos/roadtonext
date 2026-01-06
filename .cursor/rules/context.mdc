@@ -1,0 +1,7 @@
+---
+alwaysApply: true
+---
+This app is done as part of a NextJS course: The Road to Next
+https://www.road-to-next.com
+
+But I made some adjustments on my own, based on preference. One of the most important is about using betterauth library for authentication related tasks, instead of what the course does (a more manual approach, and usage of Lucia/Oslo libraries). There are also places where I used react-hook-form and a more typical form management instead of server actions with new mechanics (useActionState, useFormStatus, etc), right now both appear in this project.

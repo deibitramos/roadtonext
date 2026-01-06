@@ -12,10 +12,7 @@ const createOrganizationSchema = z.object({
 });
 
 const createOrganization = async (_actionState: ActionState, formData: FormData) => {
-	const user = await getSessionUserOrRedirect({
-		skipOrganizationCheck: true,
-		skipActiveOrganizationCheck: true,
-	});
+	const user = await getSessionUserOrRedirect({ skipHasOrgCheck: true, skipActiveOrgCheck: true });
 
 	try {
 		const data = createOrganizationSchema.parse({
@@ -24,7 +21,12 @@ const createOrganization = async (_actionState: ActionState, formData: FormData)
 
 		await prisma.$transaction(async (tx) => {
 			const organization = await tx.organization.create({
-				data: { ...data, memberships: { create: { userId: user.id, isActive: true } } },
+				data: {
+					...data,
+					memberships: {
+						create: { userId: user.id, isActive: true, role: 'ADMIN' },
+					},
+				},
 			});
 
 			await tx.membership.updateMany({

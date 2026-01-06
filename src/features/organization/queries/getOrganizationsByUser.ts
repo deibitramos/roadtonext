@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 
 const getOrganizationsByUser = async (protect: boolean) => {
 	const user = await getSessionUserOrRedirect(
-		protect ? undefined : { skipOrganizationCheck: true, skipActiveOrganizationCheck: true },
+		protect ? undefined : { skipHasOrgCheck: true, skipActiveOrgCheck: true },
 	);
 
 	const organizations = await prisma.organization.findMany({

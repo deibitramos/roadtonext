@@ -4,13 +4,14 @@ import { redirect } from 'next/navigation';
 import { setCookie } from '@/actions/cookies';
 import { auth } from '@/lib/auth/server';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
+import { actionError } from '@/lib/types';
 
 const verifyEmail = async (otp: string) => {
 	// Get user from session without checking email verification or organization
 	const user = await getSessionUserOrRedirect({
-		skipEmailVerification: true,
-		skipOrganizationCheck: true,
-		skipActiveOrganizationCheck: true,
+		skipEmailVerify: true,
+		skipHasOrgCheck: true,
+		skipActiveOrgCheck: true,
 	});
 
 	// Verify email using Better Auth API
@@ -19,7 +20,7 @@ const verifyEmail = async (otp: string) => {
 	});
 
 	if (!result) {
-		throw new Error('Failed to verify email');
+		return actionError('Failed to verify email');
 	}
 
 	await setCookie('toast', 'Email verified successfully!');

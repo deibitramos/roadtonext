@@ -27,6 +27,7 @@ const upsertTicket = async (
 	formData: FormData,
 ) => {
 	const user = await getSessionUserOrRedirect();
+	if (!user.activeMembershipId) return toActionState('Not authorized', 'ERROR');
 
 	try {
 		if (id) {
@@ -47,7 +48,11 @@ const upsertTicket = async (
 			bounty: toCent(data.bounty),
 		};
 
-		await prisma.ticket.upsert({ where: { id: id || '' }, update: dbData, create: dbData });
+		await prisma.ticket.upsert({
+			where: { id: id || '' },
+			update: dbData,
+			create: { ...dbData, organizationId: user.activeMembershipId },
+		});
 	} catch (error) {
 		return fromErrorToActionState(error, formData);
 	}

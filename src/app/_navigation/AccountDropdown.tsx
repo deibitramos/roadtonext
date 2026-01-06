@@ -14,10 +14,7 @@ import { getSessionUserOrRedirect } from '@/lib/auth/session';
 
 async function AccountDropdown() {
 	// Skip organization check since this component is in layout that includes /onboarding
-	const user = await getSessionUserOrRedirect({
-		skipOrganizationCheck: true,
-		skipActiveOrganizationCheck: true,
-	});
+	const user = await getSessionUserOrRedirect({ skipHasOrgCheck: true, skipActiveOrgCheck: true });
 
 	const initials = user.name
 		.split(' ')

@@ -9,6 +9,7 @@ import TicketSortSelect from './TicketSortSelect';
 type Props = {
 	userId?: string;
 	searchParams: ParsedSearchParams;
+	byOrganization?: boolean;
 };
 
 const sortOptions = [
@@ -17,8 +18,9 @@ const sortOptions = [
 	{ label: 'Bounty', sortKey: 'bounty', sortValue: 'desc' },
 ];
 
-async function TicketList({ userId, searchParams }: Props) {
-	const { list: tickets, metadata: ticketMetadata } = await getTickets(userId, searchParams);
+async function TicketList({ userId, searchParams, byOrganization = false }: Props) {
+	const result = await getTickets(userId, searchParams, byOrganization);
+	const { list: tickets, metadata: ticketMetadata } = result;
 
 	return (
 		<div className="flex flex-1 flex-col items-center gap-y-4 animate-fade-from-top">

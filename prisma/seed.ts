@@ -14,7 +14,7 @@ const users = [
 	['admin-id', 'Admin', 'admin@deibit.dev', true] as const,
 	['user-id', 'User', 'davidramos.13@outlook.com', true] as const,
 	['alice-id', 'Alice', 'alice@deibit.dev', true] as const,
-	['bob-id', 'Bob', 'bob@deibit.dev', true] as const,
+	['bob-id', 'Bob', 'bob@deibit.dev', false] as const,
 	['charlie-id', 'Charlie', 'charlie@deibit.dev', true] as const,
 	['jose-id', 'Jose', 'jose@deibit.dev', true] as const,
 ].map(([id, name, email, emailVerified]) => ({ id, name, email, emailVerified }));
@@ -36,27 +36,28 @@ const organizations = [
 ].map(([id, name]) => ({ id, name }));
 
 const memberships = [
-	['admin-id', 'org-1-id', 172800, true] as const, // Admin in Acme (active)
-	['admin-id', 'org-2-id', 86400, false] as const, // Admin in Tech Innovators (inactive)
+	['admin-id', 'org-1-id', 172800, true, 'ADMIN'] as const, // Admin in Acme (active)
+	['admin-id', 'org-2-id', 86400, false, 'ADMIN'] as const, // Admin in Tech Innovators (inactive)
 	['user-id', 'org-1-id', 86400, true] as const, // User in Acme (active)
 	['alice-id', 'org-1-id', 43200, true] as const, // Alice in Acme (active)
 	['alice-id', 'org-2-id', 21600, false] as const, // Alice in Tech Innovators (inactive)
 	['bob-id', 'org-2-id', 43200, true] as const, // Bob in Tech Innovators (active)
 	['charlie-id', 'org-1-id', 7200, true] as const, // Charlie in Acme (active)
-].map(([userId, organizationId, secondsAgo, isActive]) => ({
-	...{ userId, organizationId },
+].map(([userId, organizationId, secondsAgo, isActive, role]) => ({
+	...{ userId, organizationId, role },
 	...{ joinedAt: new Date(Date.now() - secondsAgo * 1000), isActive },
 }));
 
 const tickets = [
-	['ticket-1', 'First Ticket', 'first', 'DONE', 49900, 'admin-id', 86400] as const,
-	['ticket-2', 'Second Ticket', 'second', 'OPEN', 39900, 'admin-id', 43200] as const,
-	['ticket-3', 'Third Ticket', 'third', 'IN_PROGRESS', 59900, 'user-id', 7200] as const,
-	['ticket-4', 'Fourth Ticket', 'fourth', 'OPEN', 29900, 'alice-id', 21600] as const,
-	['ticket-5', 'Fifth Ticket', 'fifth', 'IN_PROGRESS', 69900, 'bob-id', 14400] as const,
-].map(([id, title, content, status, bounty, userId, secondsAgo]) => ({
+	['ticket-1', 'First Ticket', 'first', 'DONE', 49900, 'admin-id', 'org-1-id', 86400] as const,
+	['ticket-2', 'Second Ticket', 'second', 'OPEN', 39900, 'admin-id', 'org-2-id', 43200] as const,
+	['ticket-3', 'Third Ticket', 'third', 'IN_PROGRESS', 59900, 'user-id', 'org-1-id', 7200] as const,
+	['ticket-4', 'Fourth Ticket', 'fourth', 'OPEN', 29900, 'alice-id', 'org-1-id', 21600] as const,
+	['ticket-5', 'Fifth Ticket', 'fifth', 'IN_PROGRESS', 69900, 'bob-id', 'org-2-id', 14400] as const,
+].map(([id, title, content, status, bounty, userId, organizationId, secondsAgo]) => ({
 	...{ id, title, content: `This is the first ${content} from DB`, status },
-	...{ bounty, deadline: TODAY_DATE, userId, createdAt: new Date(Date.now() - secondsAgo * 1000) },
+	...{ bounty, deadline: TODAY_DATE, userId, organizationId },
+	...{ createdAt: new Date(Date.now() - secondsAgo * 1000) },
 }));
 
 const comments = [

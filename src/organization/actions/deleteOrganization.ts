@@ -1,26 +1,27 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { fromErrorToActionState, toActionState } from '@/components/form/utils/toActionState';
-import { getSessionUserOrRedirect } from '@/lib/auth/session';
+import getAdminOrRedirect from '@/features/membership/queries/getAdminOrRedirect';
 import prisma from '@/lib/prisma';
+import { actionError, actionSuccess } from '@/lib/types';
 
 const deleteOrganization = async (organizationId: string) => {
-	const user = await getSessionUserOrRedirect();
+	const user = await getAdminOrRedirect(organizationId);
 
 	try {
 		const membership = await prisma.membership.findFirst({
 			where: { organizationId, userId: user.id },
 		});
-		if (!membership) return toActionState('Not a member of this organization', 'ERROR');
+		if (!membership) return actionError('Not a member of this organization');
 
 		await prisma.organization.delete({ where: { id: organizationId } });
 	} catch (error) {
-		return fromErrorToActionState(error);
+		const message = error instanceof Error ? error.message : 'An unknown error occurred';
+		return actionError(message);
 	}
 
 	revalidatePath('/organization');
-	return toActionState('Organization has been deleted');
+	return actionSuccess();
 };
 
 export default deleteOrganization;

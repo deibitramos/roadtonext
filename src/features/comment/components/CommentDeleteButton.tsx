@@ -1,7 +1,7 @@
 'use client';
 
 import { TrashIcon } from 'lucide-react';
-import ConfirmDialog from '@/components/ConfirmDialog';
+import ActionConfirmDialog from '@/components/ActionConfirmDialog';
 import useModal from '@/components/hooks/useModal';
 import { Button } from '@/components/ui/button';
 import deleteComment from '../actions/deleteComment';
@@ -19,7 +19,7 @@ function CommentDeleteButton({ id, onDelete }: Props) {
 			<Button variant="outline" size="icon" onClick={openModal}>
 				<TrashIcon className="size-4" />
 			</Button>
-			<ConfirmDialog
+			<ActionConfirmDialog
 				open={open}
 				closeModal={closeModal}
 				action={deleteComment.bind(null, id)}

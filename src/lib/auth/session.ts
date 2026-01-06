@@ -10,30 +10,29 @@ export const getAuthSession = cache(async () => {
 });
 
 export type SessionOptions = {
-	skipEmailVerification?: boolean;
-	skipOrganizationCheck?: boolean;
-	skipActiveOrganizationCheck?: boolean;
+	skipEmailVerify?: boolean;
+	skipHasOrgCheck?: boolean;
+	skipActiveOrgCheck?: boolean;
 };
 
-export const getSessionUserOrRedirect = cache(async (options?: SessionOptions) => {
+export const getSessionUserOrRedirect = cache(async (options: SessionOptions = {}) => {
+	const { skipEmailVerify = false, skipHasOrgCheck = false, skipActiveOrgCheck = false } = options;
+
 	const userSession = await getAuthSession();
 
 	if (!userSession) {
 		redirect('/sign-in');
 	}
 
-	if (!options?.skipEmailVerification && !userSession.user.emailVerified) {
+	if (!skipEmailVerify && !userSession.user.emailVerified) {
 		redirect('/email-verify');
 	}
 
-	if (!options?.skipOrganizationCheck || !options?.skipActiveOrganizationCheck) {
-		const membership = await hasMembership(userSession.user.id);
-		if (!options?.skipOrganizationCheck && !membership.hasMembership) redirect('/onboarding');
-		if (!options?.skipActiveOrganizationCheck && !membership.isActive)
-			redirect('/onboarding/select-active');
-	}
+	const membership = await hasMembership(userSession.user.id);
+	if (!skipHasOrgCheck && !membership.hasMembership) redirect('/onboarding');
+	if (!skipActiveOrgCheck && !membership.activeMembershipId) redirect('/onboarding/select-active');
 
-	return userSession.user;
+	return { ...userSession.user, activeMembershipId: membership.activeMembershipId };
 });
 
 export const getSessionUserOrUndefined = cache(async () => {
@@ -55,5 +54,5 @@ export const redirectIfHasActiveOrganization = cache(async () => {
 	const session = await getAuthSession();
 	if (!session?.user) return;
 	const membership = await hasMembership(session.user.id);
-	if (membership.isActive) redirect('/organization');
+	if (membership.activeMembershipId) redirect('/organization');
 });
