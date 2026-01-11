@@ -2,7 +2,7 @@
 
 import { MoreVerticalIcon, TrashIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import ConfirmDialog from '@/components/ConfirmDialog';
+import ActionConfirmDialog from '@/components/ActionConfirmDialog';
 import useModal from '@/components/hooks/useModal';
 import { Button } from '@/components/ui/button';
 import {
@@ -62,7 +62,7 @@ function TicketMoreMenu({ ticket }: Props) {
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
-			<ConfirmDialog
+			<ActionConfirmDialog
 				open={open}
 				closeModal={closeModal}
 				action={deleteTicket.bind(null, ticket.id)}

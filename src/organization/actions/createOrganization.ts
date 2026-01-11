@@ -1,30 +1,32 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
 import { setCookie } from '@/actions/cookies';
-import { type ActionState, fromErrorToActionState } from '@/components/form/utils/toActionState';
+import createOrganizationSchema, {
+	type CreateOrganizationData,
+} from '@/features/organization/schemas/createOrganizationSchema';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import prisma from '@/lib/prisma';
+import { actionError } from '@/lib/types';
 
-const createOrganizationSchema = z.object({
-	name: z.string().min(1).max(191),
-});
+const createOrganization = async (data: CreateOrganizationData) => {
+	const user = await getSessionUserOrRedirect({ skipHasOrgCheck: true, skipActiveOrgCheck: true });
 
-const createOrganization = async (_actionState: ActionState, formData: FormData) => {
-	const user = await getSessionUserOrRedirect({
-		skipOrganizationCheck: true,
-		skipActiveOrganizationCheck: true,
-	});
+	const result = createOrganizationSchema.safeParse(data);
+	if (!result.success) {
+		return actionError(result.error.issues[0]?.message || 'Invalid data');
+	}
 
 	try {
-		const data = createOrganizationSchema.parse({
-			name: formData.get('name'),
-		});
-
 		await prisma.$transaction(async (tx) => {
 			const organization = await tx.organization.create({
-				data: { ...data, memberships: { create: { userId: user.id, isActive: true } } },
+				data: {
+					...result.data,
+					memberships: {
+						create: { userId: user.id, isActive: true, role: 'ADMIN' },
+					},
+				},
 			});
 
 			await tx.membership.updateMany({
@@ -32,10 +34,11 @@ const createOrganization = async (_actionState: ActionState, formData: FormData)
 				data: { isActive: false },
 			});
 		});
-	} catch (error) {
-		return fromErrorToActionState(error);
-	}
 
+		revalidatePath('/organization');
+	} catch (error) {
+		return actionError(error instanceof Error ? error.message : 'Failed to create organization');
+	}
 	await setCookie('toast', 'Organization created');
 	redirect('/organization');
 };

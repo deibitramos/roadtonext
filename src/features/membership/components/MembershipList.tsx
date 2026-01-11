@@ -8,6 +8,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
+import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import getMemberships from '../queries/getMemberships';
 import MembershipDeleteButton from './MembershipDeleteButton';
 
@@ -20,6 +21,7 @@ const headers = ['Name', 'Email', 'Joined At', 'Verified Email', ''].map((header
 ));
 
 async function MembershipList({ organizationId }: Props) {
+	const user = await getSessionUserOrRedirect();
 	const memberships = await getMemberships(organizationId);
 
 	return (
@@ -29,8 +31,13 @@ async function MembershipList({ organizationId }: Props) {
 			</TableHeader>
 			<TableBody>
 				{memberships.map((membership) => {
+					const myself = membership.userId === user.id;
 					const buttons = (
-						<MembershipDeleteButton userId={membership.userId} organizationId={organizationId} />
+						<MembershipDeleteButton
+							userId={membership.userId}
+							organizationId={organizationId}
+							myself={myself}
+						/>
 					);
 
 					return (

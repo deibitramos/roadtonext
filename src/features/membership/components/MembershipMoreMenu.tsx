@@ -1,0 +1,56 @@
+'use client';
+
+import { UserCogIcon } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuLabel,
+	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import type { MembershipRole } from '@/generated/prisma/client';
+import updateMembershipRole from '../actions/updateMembershipRole';
+
+type Props = {
+	userId: string;
+	organizationId: string;
+	membershipRole: MembershipRole;
+};
+
+function MembershipMoreMenu({ userId, organizationId, membershipRole }: Props) {
+	const handleUpdateMembershipRole = async (value: string) => {
+		const promise = updateMembershipRole(userId, organizationId, value as MembershipRole);
+		toast.promise(promise, { loading: 'Updating role...' });
+		const result = await promise;
+
+		if (result.error) {
+			toast.error(result.error.message);
+			return;
+		}
+		toast.success('Role updated successfully');
+	};
+
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button variant="outline" size="icon">
+					<UserCogIcon className="w-4 h-4" />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent className="w-56">
+				<DropdownMenuLabel>Roles</DropdownMenuLabel>
+				<DropdownMenuSeparator />
+				<DropdownMenuRadioGroup value={membershipRole} onValueChange={handleUpdateMembershipRole}>
+					<DropdownMenuRadioItem value="ADMIN">Admin</DropdownMenuRadioItem>
+					<DropdownMenuRadioItem value="MEMBER">Member</DropdownMenuRadioItem>
+				</DropdownMenuRadioGroup>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+}
+
+export default MembershipMoreMenu;

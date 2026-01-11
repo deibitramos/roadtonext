@@ -1,8 +1,9 @@
-import { BookIcon, CircleUserIcon, LibraryIcon, UsersIcon } from 'lucide-react';
+import { BookCopyIcon, BookIcon, CircleUserIcon, LibraryIcon, UsersIcon } from 'lucide-react';
 import type { NavItem } from './types';
 
 const items = [
 	['All Tickets', LibraryIcon, '/'],
+	['Our Tickets', BookCopyIcon, '/tickets/organization'],
 	['My Tickets', BookIcon, '/tickets'],
 	[
 		'Account',

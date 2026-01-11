@@ -1,8 +1,8 @@
-import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import prisma from '@/lib/prisma';
+import getAdminOrRedirect from './getAdminOrRedirect';
 
 const getMemberships = async (organizationId: string) => {
-	await getSessionUserOrRedirect();
+	await getAdminOrRedirect(organizationId);
 
 	return await prisma.membership.findMany({
 		where: { organizationId },

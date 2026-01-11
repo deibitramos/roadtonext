@@ -4,3 +4,4 @@ onlyBuiltDependencies:
   - prisma
   - sharp
   - unrs-resolver
+  - protobufjs

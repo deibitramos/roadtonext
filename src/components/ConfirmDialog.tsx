@@ -1,90 +1,66 @@
-import { type ReactElement, useActionState, useEffect, useRef } from 'react';
+'use client';
+
+import { type ReactElement, useTransition } from 'react';
 import { toast } from 'sonner';
-import useActionFeedback from './form/hooks/useActionFeedback';
-import { type ActionState, EMPTY_ACTION_STATE } from './form/utils/toActionState';
+import type { ActionResult } from '@/lib/types';
 import {
 	AlertDialog,
-	AlertDialogAction,
 	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-	AlertDialogTrigger,
 } from './ui/alert-dialog';
 import { Button } from './ui/button';
 
 type Props<T> = {
 	title?: string;
 	description?: string;
-	action: () => Promise<ActionState<T>>;
+	action: () => Promise<ActionResult<T>>;
 	trigger?: ReactElement;
 	open?: boolean;
 	closeModal: () => void;
-	onSuccess?: (actionState?: ActionState<T>) => void;
+	onSuccess?: (data?: T) => void;
 };
 
-function ConfirmDialog<T = never>({
+function ConfirmDialog<T = void>({
 	open = false,
 	closeModal,
 	title = 'Are you absolutely sure?',
 	description = 'This action cannot be undone.',
 	action,
-	trigger,
 	onSuccess,
 }: Props<T>) {
-	const [actionState, newAction, isPending] = useActionState(action, EMPTY_ACTION_STATE);
+	const [isPending, startTransition] = useTransition();
 
-	const handleSuccess = () => {
+	const handleConfirm = () => {
 		closeModal();
-		onSuccess?.(actionState);
-	};
+		startTransition(async () => {
+			const loadingToast = toast.loading('Deleting...');
+			const { data, error } = await action();
+			toast.dismiss(loadingToast);
 
-	const toastRef = useRef<string | number | null>(null);
-
-	useEffect(() => {
-		if (isPending) {
-			toastRef.current = toast.loading('Deleting ...');
-		} else if (toastRef.current) {
-			toast.dismiss(toastRef.current);
-		}
-
-		return () => {
-			if (toastRef.current) {
-				toast.dismiss(toastRef.current);
+			if (error) {
+				toast.error(error.message);
+			} else {
+				onSuccess?.(data);
 			}
-		};
-	}, [isPending]);
-
-	useActionFeedback(actionState, {
-		onSuccess: ({ actionState }) => {
-			console.log('ActionForm onSuccess', actionState);
-			if (!actionState.message) return;
-			toast.success(actionState.message);
-			handleSuccess();
-		},
-		onError: ({ actionState }) => {
-			if (!actionState.message) return;
-			toast.error(actionState.message);
-		},
-	});
+		});
+	};
 
 	return (
 		<AlertDialog open={open} onOpenChange={closeModal}>
-			{trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>{title}</AlertDialogTitle>
 					<AlertDialogDescription>{description}</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel>Cancel</AlertDialogCancel>
-					<AlertDialogAction asChild>
-						<form action={newAction}>
-							<Button type="submit">Confirm</Button>
-						</form>
-					</AlertDialogAction>
+					<AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+					<Button onClick={handleConfirm} disabled={isPending}>
+						{isPending ? 'Processing...' : 'Confirm'}
+					</Button>
 				</AlertDialogFooter>
 			</AlertDialogContent>
 		</AlertDialog>

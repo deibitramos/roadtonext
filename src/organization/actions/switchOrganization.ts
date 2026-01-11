@@ -1,19 +1,19 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { fromErrorToActionState, toActionState } from '@/components/form/utils/toActionState';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import prisma from '@/lib/prisma';
+import { actionError, actionSuccess } from '@/lib/types';
 
 const switchOrganization = async (organizationId: string) => {
-	const user = await getSessionUserOrRedirect({ skipActiveOrganizationCheck: true });
+	const user = await getSessionUserOrRedirect({ skipActiveOrgCheck: true });
+
+	const membership = await prisma.membership.findFirst({
+		where: { organizationId, userId: user.id },
+	});
+	if (!membership) return actionError('Not a member of this organization');
 
 	try {
-		const membership = await prisma.membership.findFirst({
-			where: { organizationId, userId: user.id },
-		});
-		if (!membership) return toActionState('Not a member of this organization', 'ERROR');
-
 		await prisma.$transaction([
 			prisma.membership.updateMany({
 				where: { userId: user.id, organizationId: { not: organizationId } },
@@ -24,12 +24,12 @@ const switchOrganization = async (organizationId: string) => {
 				data: { isActive: true },
 			}),
 		]);
-	} catch (error) {
-		return fromErrorToActionState(error);
-	}
 
-	revalidatePath('/organization');
-	return toActionState('Active organization has been switched');
+		revalidatePath('/organization');
+		return actionSuccess();
+	} catch (error) {
+		return actionError(error instanceof Error ? error.message : 'Failed to switch organization');
+	}
 };
 
 export default switchOrganization;

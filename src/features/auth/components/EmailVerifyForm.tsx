@@ -1,6 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
+import { toast } from 'sonner';
 import Form from '@/components/form/Form';
 import InputText from '@/components/form/fields/InputText';
 import useForm from '@/components/form/hooks/useForm';
@@ -14,7 +15,12 @@ function EmailVerifyForm() {
 
 	const form = useForm(emailVerifySchema, {
 		submit: async ({ code }) => {
-			await verifyEmail(code);
+			const { error } = await verifyEmail(code);
+
+			if (error) {
+				toast.error(error.message);
+			}
+			// On success, the action redirects - no need to handle here
 		},
 	});
 
@@ -22,7 +28,13 @@ function EmailVerifyForm() {
 
 	const handleResendCode = () => {
 		startTransition(async () => {
-			await resendVerificationCode();
+			const { error } = await resendVerificationCode();
+
+			if (error) {
+				toast.error(error.message);
+			} else {
+				toast.success('Verification code sent!');
+			}
 		});
 	};
 

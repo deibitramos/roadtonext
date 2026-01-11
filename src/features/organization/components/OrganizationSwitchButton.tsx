@@ -1,10 +1,9 @@
 'use client';
 
 import { ArrowLeftRightIcon } from 'lucide-react';
-import { useActionState } from 'react';
-import ActionForm from '@/components/form/ActionForm';
+import { useTransition } from 'react';
+import { toast } from 'sonner';
 import SubmitButton from '@/components/form/SubmitButton';
-import { EMPTY_ACTION_STATE } from '@/components/form/utils/toActionState';
 import switchOrganization from '@/organization/actions/switchOrganization';
 
 type Props = {
@@ -14,17 +13,30 @@ type Props = {
 };
 
 function OrganizationSwitchButton({ organizationId, isActive, hasActive }: Props) {
-	const [actionState, action] = useActionState(
-		switchOrganization.bind(null, organizationId),
-		EMPTY_ACTION_STATE,
-	);
+	const [isPending, startTransition] = useTransition();
+
+	const handleSwitch = () => {
+		startTransition(async () => {
+			const result = await switchOrganization(organizationId);
+			if (result.error) {
+				toast.error(result.error.message);
+			} else {
+				toast.success('Active organization has been switched');
+			}
+		});
+	};
 
 	return (
-		<ActionForm action={action} actionState={actionState}>
-			<SubmitButton variant={isActive ? 'default' : 'outline'} icon={ArrowLeftRightIcon}>
-				{!hasActive ? 'Activate' : isActive ? 'Active' : 'Switch'}
-			</SubmitButton>
-		</ActionForm>
+		<SubmitButton
+			type="button"
+			variant={isActive ? 'default' : 'outline'}
+			onClick={handleSwitch}
+			disabled={isPending || isActive}
+			isSubmitting={isPending}
+			icon={ArrowLeftRightIcon}
+		>
+			{!hasActive ? 'Activate' : isActive ? 'Active' : 'Switch'}
+		</SubmitButton>
 	);
 }
 
