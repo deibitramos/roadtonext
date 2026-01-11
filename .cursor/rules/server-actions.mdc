@@ -1,0 +1,315 @@
+---
+description: Server actions patterns and conventions
+alwaysApply: false
+---
+# Server Actions Patterns
+
+Server actions are the primary way to handle mutations (create, update, delete) in this Next.js application.
+
+## Preferred Pattern: Direct Async Calls
+
+**This is the preferred pattern** for server actions. Actions are called directly from JavaScript as async functions, returning `ActionResult<T>` with `actionSuccess()` or `actionError()` helpers.
+
+### Basic Structure
+
+```typescript
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { getSessionUserOrRedirect } from '@/lib/auth/session';
+import { actionError, actionSuccess } from '@/lib/types';
+import prisma from '@/lib/prisma';
+
+const myAction = async (userId: string, organizationId: string, data: MyData) => {
+  await getSessionUserOrRedirect();
+
+  // Validation
+  if (!data.title) {
+    return actionError('Title is required');
+  }
+
+  // Business logic checks
+  const existing = await prisma.model.findUnique({ where: { id } });
+  if (!existing) {
+    return actionError('Resource not found');
+  }
+
+  // Database operation
+  await prisma.model.update({ where: { id }, data });
+
+  // Revalidation
+  revalidatePath('/path');
+
+  return actionSuccess();
+};
+```
+
+### Action Signature
+
+Actions accept typed parameters directly (not FormData):
+
+```typescript
+async function action( param1: string, param2: number, data: MyType) {
+  // Server action code
+}
+```
+
+### Return Types
+
+Use `ActionResult<T>` from `@/lib/types`:
+
+```typescript
+import { actionError, actionSuccess } from '@/lib/types';
+
+// Success (with optional data)
+return actionSuccess();
+return actionSuccess({ id: '123', name: 'Updated' });
+
+// Error (with message)
+return actionError('Error message');
+```
+
+### Calling from Components
+
+#### Same Page (No Redirect)
+
+When the action doesn't redirect, handle toasts in the component:
+
+```typescript
+'use client';
+
+import { toast } from 'sonner';
+import { myAction } from '@/features/myfeature/actions/myAction';
+
+function MyComponent() {
+  const handleAction = async () => {
+    const result = await myAction(userId, orgId, data);
+
+    if (result.error) {
+      toast.error(result.error.message);
+      return;
+    }
+
+    toast.success('Success!');
+    // Handle success (e.g., reset form, close modal, etc.)
+  };
+
+  return <button onClick={handleAction}>Submit</button>;
+}
+```
+
+#### With Redirect
+
+When the action redirects, **do not show success toast in the handler**. The server action should use `setCookie('toast', '...')` instead:
+
+```typescript
+// In component - NO success toast
+'use client';
+
+function MyComponent() {
+  const handleAction = async () => {
+    const result = await myAction(data);
+    if (result.error) {
+      toast.error(result.error.message);
+    }
+    // On success, action redirects - no need to handle here
+  };
+
+  return <button onClick={handleAction}>Submit</button>;
+}
+
+// In server action
+'use server';
+
+import { setCookie } from '@/actions/cookies';
+import { redirect } from 'next/navigation';
+
+const myAction = async (data: MyData) => {
+  // ... validation and database operations ...
+
+  revalidatePath('/path');
+  await setCookie('toast', 'Success message');
+  redirect('/path');
+
+  return actionSuccess();
+};
+```
+
+The toast will be displayed on the redirected page via the toast cookie mechanism.
+
+### Example: Update Membership Role
+
+```typescript
+// features/membership/actions/updateMembershipRole.ts
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import type { MembershipRole } from '@/generated/prisma/client';
+import { getSessionUserOrRedirect } from '@/lib/auth/session';
+import { actionError, actionSuccess } from '@/lib/types';
+import prisma from '@/lib/prisma';
+
+const updateMembershipRole = async (
+  userId: string,
+  organizationId: string,
+  role: MembershipRole,
+) => {
+  await getSessionUserOrRedirect();
+
+  const membership = await prisma.membership.findUnique({
+    where: { userId_organizationId: { userId, organizationId } },
+  });
+
+  if (!membership) return actionError('Membership not found');
+
+  await prisma.membership.update({
+    where: { userId_organizationId: { userId, organizationId } },
+    data: { role },
+  });
+
+  revalidatePath(`/organization/${organizationId}/memberships`);
+  return actionSuccess();
+};
+```
+
+## Legacy Pattern: Form POST (FormData + ActionState)
+
+**This pattern exists in some parts of the codebase** (from the course) but is not preferred for new code. It uses Next.js form POST mechanism with `FormData` and `ActionState`.
+
+### When Used
+
+- Only for traditional form submissions that work without JavaScript
+- Uses `useActionState` hook
+- Requires wrapping in `<form>` element
+- Returns `ActionState` type
+
+### Structure
+
+```typescript
+'use server';
+
+import {
+  type ActionState,
+  fromErrorToActionState,
+  toActionState,
+} from '@/components/form/utils/toActionState';
+
+const legacyAction = async (
+  id: string | undefined,
+  _actionState: ActionState,
+  formData: FormData,
+) => {
+  const user = await getSessionUserOrRedirect();
+
+  try {
+    const data = schema.parse({
+      field: formData.get('field'),
+    });
+
+    await prisma.model.upsert({ where: { id: id || '' }, update: data, create: data });
+
+    revalidatePath('/path');
+    return toActionState('Success');
+  } catch (error) {
+    return fromErrorToActionState(error, formData);
+  }
+};
+```
+
+**Note**: Prefer the direct async call pattern for new code. Only use this pattern if you specifically need form POST behavior without JavaScript.
+
+## Common Patterns
+
+### Authorization
+
+```typescript
+const user = await getSessionUserOrRedirect();
+
+// Check ownership
+if (!isOwner(user, resource)) {
+  return actionError('Not authorized');
+}
+
+// Check organization membership
+if (!user.activeMembershipId) {
+  return actionError('No active organization');
+}
+```
+
+### Validation
+
+Validate with Zod before database operations:
+
+```typescript
+import { z } from 'zod/v4';
+
+const schema = z.object({
+  title: z.string().min(1).max(191),
+  amount: z.coerce.number().positive(),
+});
+
+const result = schema.safeParse(data);
+if (!result.success) {
+  return actionError(result.error.errors[0].message);
+}
+```
+
+### Revalidation
+
+After mutations, revalidate affected paths:
+
+```typescript
+import { revalidatePath } from 'next/cache';
+
+revalidatePath('/tickets');
+revalidatePath(`/organization/${orgId}/memberships`);
+```
+
+### Redirects and Toasts
+
+When redirecting after a successful action, use `setCookie('toast', '...')` to show a success message on the redirected page:
+
+```typescript
+import { setCookie } from '@/actions/cookies';
+import { redirect } from 'next/navigation';
+
+const myAction = async (data: MyData) => {
+  // ... operations ...
+
+  revalidatePath('/path');
+  await setCookie('toast', 'Success message');
+  redirect('/path');
+
+  return actionSuccess();
+};
+```
+
+**Important**: When using redirects, do not show success toasts in the component handler - the toast cookie will handle it. Only show error toasts in the component handler.
+
+### Error Handling
+
+Return errors early with `actionError()`:
+
+```typescript
+if (!resource) return actionError('Resource not found');
+if (!hasPermission) return actionError('Not authorized');
+if (validationFails) return actionError('Invalid data');
+```
+
+## File Organization
+
+- Place actions in `features/{feature}/actions/` directory
+- One file per action
+- Name files descriptively: `createTicket.ts`, `updateTicket.ts`, `deleteTicket.ts`
+- Export default the action function
+
+## Best Practices
+
+1. **Use preferred pattern** - Direct async calls with `actionSuccess()`/`actionError()`
+2. **Type parameters** - Accept typed parameters, not FormData
+3. **Early returns** - Return errors early with `actionError()`
+4. **Revalidate paths** - Always revalidate affected paths after mutations
+5. **Authorization checks** - Check permissions before operations
+6. **Validation** - Validate input data (prefer Zod)
+7. **Error messages** - Provide clear, user-friendly error messages
+8. **Compact formatting** - Prefer single-line formatting when code fits within the 100-character line limit and Biome formatting rules (e.g., `await prisma.model.update({ where: { id }, data });` instead of multi-line)

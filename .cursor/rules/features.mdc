@@ -1,0 +1,203 @@
+---
+description: Feature-based organization patterns and conventions
+alwaysApply: false
+---
+# Feature-Based Organization
+
+This project organizes code by **features** rather than by technical layers. Each feature is self-contained with its own actions, components, queries, and schemas.
+
+## Feature Structure
+
+Each feature module follows this structure:
+
+```
+features/{feature-name}/
+├── actions/           # Server actions (mutations)
+├── components/        # Feature-specific React components
+├── queries/           # Data fetching functions
+├── schemas/           # Zod validation schemas
+├── types.ts           # TypeScript types
+├── constants.tsx      # Feature constants
+└── utils/             # Feature-specific utilities (optional)
+```
+
+## Current Features
+
+### Authentication (`features/auth/`)
+- User sign-up, sign-in, email verification
+- Password reset functionality
+- Session management
+
+### Tickets (`features/ticket/`)
+- Create, read, update, delete tickets
+- Ticket status management
+- Search and filtering
+- Pagination
+
+### Comments (`features/comment/`)
+- Create and delete comments on tickets
+- Comment display and management
+
+### Organizations (`features/organization/`)
+- Organization listing and switching
+- Membership queries
+
+### Memberships (`features/membership/`)
+- Membership management
+- Role updates (MEMBER/ADMIN)
+- Membership deletion
+
+### Password (`features/password/`)
+- Password change
+- Password reset flow
+- Email notifications
+
+## Feature Guidelines
+
+### 1. Keep Features Self-Contained
+
+All code related to a feature should live within that feature directory:
+
+```typescript
+// ✅ Good - Feature-specific component
+features/ticket/components/TicketList.tsx
+
+// ❌ Bad - Generic component in feature
+components/TicketList.tsx
+```
+
+### 2. Shared vs Feature-Specific
+
+- **Feature-specific**: Goes in `features/{feature}/`
+- **Shared across features**: Goes in `components/`, `lib/`, or `utils/`
+
+### 3. Feature Components
+
+Components in features should:
+- Be specific to that feature
+- Not be reused across multiple features
+- Use shared UI components from `components/ui/`
+
+```typescript
+// Feature component using shared UI
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+
+export function TicketItem({ ticket }) {
+  return (
+    <Card>
+      <h3>{ticket.title}</h3>
+      <Button>View</Button>
+    </Card>
+  );
+}
+```
+
+### 4. Feature Queries
+
+Query functions should:
+- Be pure functions (no side effects)
+- Accept parameters explicitly
+- Return typed data
+- Be usable in both server and client components
+
+```typescript
+// features/ticket/queries/getTickets.ts
+export default async function getTickets(
+  userId: string | undefined,
+  searchParams: ParsedSearchParams,
+  byOrganization: boolean,
+) {
+  // Implementation
+  return { list: tickets, metadata: { count, hasNextPage } };
+}
+```
+
+### 5. Feature Actions
+
+Server actions should:
+- Be in `actions/` directory
+- Follow server action patterns (see `server-actions.mdc`)
+- Handle feature-specific business logic
+
+```typescript
+// features/ticket/actions/upsertTicket.ts
+'use server';
+
+export default async function upsertTicket(
+  id: string | undefined,
+  _actionState: ActionState,
+  formData: FormData,
+) {
+  // Feature-specific logic
+}
+```
+
+### 6. Feature Schemas
+
+Zod schemas should:
+- Be in `schemas/` directory
+- Match form fields and API contracts
+- Be exported for reuse
+
+```typescript
+// features/ticket/schemas/ticketSchema.ts
+import { z } from 'zod/v4';
+
+export const ticketSchema = z.object({
+  title: z.string().min(1).max(191),
+  content: z.string().min(1).max(1024),
+});
+```
+
+## Cross-Feature Dependencies
+
+When features need to interact:
+
+### Option 1: Import from Feature
+
+```typescript
+// In ticket feature, use auth utilities
+import isOwner from '@/features/auth/utils/isOwner';
+```
+
+### Option 2: Shared Utilities
+
+If logic is shared, move to `lib/` or `utils/`:
+
+```typescript
+// lib/utils.ts - Shared across features
+export function formatCurrency(amount: number) {
+  // ...
+}
+```
+
+## Feature Constants
+
+Use `constants.tsx` for feature-specific constants:
+
+```typescript
+// features/ticket/constants.tsx
+export const TICKET_STATUSES = ['OPEN', 'IN_PROGRESS', 'DONE'] as const;
+export const TICKET_SORT_OPTIONS = [
+  { value: 'createdAt', label: 'Created' },
+  { value: 'title', label: 'Title' },
+] as const;
+```
+
+## Best Practices
+
+1. **One feature per directory** - Don't mix features
+2. **Feature boundaries** - Keep features independent when possible
+3. **Shared code** - Move truly shared code to `components/` or `lib/`
+4. **Naming** - Use descriptive names that indicate the feature
+5. **Types** - Define types in `types.ts` within the feature
+6. **Exports** - Export only what's needed by other features
+
+## Adding a New Feature
+
+1. Create feature directory: `src/features/{feature-name}/`
+2. Add subdirectories: `actions/`, `components/`, `queries/`, `schemas/`
+3. Create initial files following patterns
+4. Import shared components from `@/components/ui/`
+5. Use existing patterns from other features as reference

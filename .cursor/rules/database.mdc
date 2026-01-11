@@ -1,0 +1,193 @@
+---
+description: Database patterns with Prisma ORM
+alwaysApply: false
+---
+# Database Patterns
+
+This project uses **Prisma ORM** with **PostgreSQL** as the database.
+
+## Prisma Client
+
+Always use the singleton Prisma client instance:
+
+```typescript
+import prisma from '@/lib/prisma';
+
+// Never create new PrismaClient() instances
+```
+
+## Query Patterns
+
+### Basic Queries
+
+```typescript
+// Find many
+const tickets = await prisma.ticket.findMany({
+  where: { userId },
+  include: { user: { select: { name: true } } },
+});
+
+// Find unique
+const ticket = await prisma.ticket.findUnique({ where: { id } });
+
+// Count
+const count = await prisma.ticket.count({ where });
+```
+
+### Transactions
+
+Use transactions for multiple related operations:
+
+```typescript
+const [tickets, count] = await prisma.$transaction([
+  prisma.ticket.findMany({ where, skip, take }),
+  prisma.ticket.count({ where }),
+]);
+```
+
+### Caching Queries
+
+Use React `cache()` for queries that might be called multiple times:
+
+```typescript
+import { cache } from 'react';
+
+const getTicket = cache(async (id: string) => {
+  return await prisma.ticket.findUnique({ where: { id } });
+});
+```
+
+## Query Functions
+
+Place query functions in `features/{feature}/queries/`:
+
+```typescript
+// features/ticket/queries/getTickets.ts
+import prisma from '@/lib/prisma';
+
+const getTickets = async (userId: string, searchParams: ParsedSearchParams) => {
+  const where = {
+    userId,
+    title: { contains: searchParams.search, mode: 'insensitive' },
+  };
+
+  const [tickets, count] = await prisma.$transaction([
+    prisma.ticket.findMany({
+      where,
+      skip: searchParams.page * searchParams.size,
+      take: searchParams.size,
+      orderBy: { [sortKey]: sortValue },
+    }),
+    prisma.ticket.count({ where }),
+  ]);
+
+  return {
+    list: tickets,
+    metadata: { count, hasNextPage: count > skip + take },
+  };
+};
+```
+
+## Data Models
+
+Key models in the schema:
+
+- **User** - Authentication and user data
+- **Organization** - Organizations/teams
+- **Membership** - User-organization relationships
+- **Ticket** - Main ticket/bounty system
+- **Comment** - Comments on tickets
+- **Session** - User sessions (Better Auth)
+- **Account** - OAuth accounts (Better Auth)
+- **Verification** - Email verification tokens
+
+## Common Patterns
+
+### Pagination
+
+```typescript
+const take = searchParams.size;
+const skip = searchParams.page * searchParams.size;
+
+const [items, count] = await prisma.$transaction([
+  prisma.model.findMany({ where, skip, take }),
+  prisma.model.count({ where }),
+]);
+```
+
+### Filtering
+
+```typescript
+const where = {
+  userId: userId ?? undefined,
+  title: { contains: search, mode: 'insensitive' },
+  status: status ? { equals: status } : undefined,
+  organizationId: activeMembershipId ?? undefined,
+};
+```
+
+### Sorting
+
+```typescript
+const orderBy = {
+  [sortKey]: sortValue, // 'asc' or 'desc'
+};
+```
+
+### Includes/Selects
+
+```typescript
+// Include relations
+include: {
+  user: { select: { name: true, email: true } },
+  organization: true,
+}
+
+// Select specific fields
+select: { id: true, title: true, createdAt: true }
+```
+
+## Prisma Schema Location
+
+- **Schema**: `prisma/schema.prisma`
+- **Migrations**: `prisma/migrations/`
+- **Generated Client**: `src/generated/prisma/` (auto-generated)
+
+## Migration Workflow
+
+1. Edit `prisma/schema.prisma`
+2. Create migration: `npx prisma migrate dev --name migration_name`
+3. Prisma generates client automatically (via `postinstall` script)
+4. **Update seed file** - If schema changes affect data structure, update `prisma/seed.ts` to conform to the updated schema
+
+## Seed File
+
+The seed file (`prisma/seed.ts`) contains test data for development.
+
+**Important**: Whenever the Prisma schema is updated (fields added/removed, models changed, relationships modified, etc.), the seed file will very probably need to be updated too to conform to the updated schema. Review the seed file after schema changes to ensure:
+- All required fields are provided
+- Field types match the schema
+- Relationships are correctly established
+- Data structure matches the new schema structure
+
+## Best Practices
+
+1. **Use transactions** for related operations
+2. **Cache queries** that might be called multiple times in same request
+3. **Use `select`** instead of `include` when you only need specific fields
+4. **Handle undefined** in where clauses (use `?? undefined` pattern)
+5. **Index frequently queried fields** (already defined in schema)
+6. **Use enums** for status fields (TicketStatus, MembershipRole)
+7. **Cascade deletes** are configured in schema for related data
+8. **Compact formatting** - Prefer single-line Prisma queries when they fit within the 100-character line limit (e.g., `await prisma.ticket.findUnique({ where: { id } });` instead of multi-line)
+
+## Type Safety
+
+Prisma generates TypeScript types automatically:
+
+```typescript
+import type { Ticket, TicketStatus } from '@/generated/prisma';
+
+// Use generated types
+const ticket: Ticket = await prisma.ticket.findUnique({ where: { id } });
+```

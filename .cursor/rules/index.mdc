@@ -1,0 +1,89 @@
+---
+alwaysApply: true
+---
+# Road to Next.js - Project Overview
+
+This is a **Next.js 16** application following the [Road to Next.js course](https://www.road-to-next.com) with some personal adjustments. The project is a ticket management system called "TicketBounty" that allows users to create tickets with bounties, manage organizations, and collaborate on tickets.
+
+## Project Context
+
+- **Framework**: Next.js 16.1.1 with App Router
+- **Language**: TypeScript (strict mode)
+- **Course**: Based on Road to Next.js course (https://www.road-to-next.com)
+- **Note**: This implementation includes personal adjustments and modifications from the original course
+
+## Key Technologies
+
+- **React**: 19.2.3 with React Compiler enabled
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Better Auth
+- **State Management**: TanStack Query (React Query)
+- **Forms**: React Hook Form with Zod validation
+- **Styling**: Tailwind CSS 4 with shadcn/ui components
+- **Email**: React Email with Resend
+- **Background Jobs**: Inngest
+- **Linting/Formatting**: Biome
+- **URL State**: nuqs for search params management
+
+## Project Structure
+
+The project follows a feature-based architecture:
+
+```
+src/
+├── app/              # Next.js App Router pages and layouts
+├── components/       # Shared UI components
+├── features/         # Feature modules (auth, ticket, comment, etc.)
+├── lib/              # Core utilities and configurations
+├── emails/           # Email templates
+└── utils/            # Utility functions
+```
+
+## General Guidelines
+
+1. **Always use TypeScript** - Strict mode is enabled
+2. **Follow feature-based organization** - Group related code by feature
+3. **Use server actions** for mutations (see `server-actions.mdc`)
+4. **Data fetching is server-first** - Almost all queries happen in Server Components calling query functions.
+5. **Client side fetching** - Rare, only when when a specific feature needs it (Right now I use @tanstack/query `useInfiniteQuery()` for infinite scroll feature and nothing else)
+6. **Validate with Zod** - All form inputs and API data should be validated
+7. **Use Biome** for formatting and linting (run `pnpm check` before committing)
+8. **Path aliases** - Use `@/` prefix for imports from `src/`
+9. **Server components by default** - Use client components only when needed
+
+## Code Style
+
+- **Quotes**: Single quotes (configured in Biome)
+- **Line width**: 100 characters
+- **Indentation**: Tabs
+- **Compact formatting**: Prefer fewer lines when code fits within the line length limit and Biome formatting rules. For example, prefer `await prisma.model.update({ where: { id }, data });` over multi-line formatting when it fits on one line.
+- **Naming**:
+  - Components: PascalCase
+  - Files: camelCase for utilities, PascalCase for components
+  - Folders: kebab-case
+
+## Development Commands
+
+- `pnpm dev` - Start development server
+- `pnpm build` - Build for production
+- `pnpm check` - Run Biome check and format
+- `pnpm tsc` - Type check without emitting
+- `pnpm email` - Preview email templates
+
+## Important Patterns
+
+- **Server Actions**: Use `'use server'` directive. Preferred pattern: direct async calls returning `ActionResult<T>` with `actionSuccess()`/`actionError()` helpers. Legacy pattern: FormData + ActionState for form POSTs (see `server-actions.mdc`)
+- **Queries**: Almost always done server-side in Server Components. Client-side only for infinite scroll with `useInfiniteQuery()`
+- **Database**: Use Prisma client from `@/lib/prisma`
+- **Authentication**: Use `getSessionUserOrRedirect()` or `getSessionUserOrUndefined()` from `@/lib/auth/session`
+
+## Rule Files Reference
+
+For specific patterns and conventions, refer to these rule files:
+
+- **[architecture.mdc](architecture.mdc)** - Project structure, folder organization, App Router patterns, Server vs Client Components, data fetching patterns
+- **[server-actions.mdc](server-actions.mdc)** - Server action patterns, preferred async call pattern with `actionSuccess()`/`actionError()`, legacy FormData pattern, error handling, revalidation
+- **[database.mdc](database.mdc)** - Prisma ORM patterns, query functions, transactions, pagination, filtering, schema management
+- **[features.mdc](features.mdc)** - Feature-based organization patterns, feature structure guidelines, cross-feature dependencies
+- **[forms.mdc](forms.mdc)** - Form handling with React Hook Form, legacy FormData/ActionState pattern, validation patterns
+- **[styling.mdc](styling.mdc)** - Tailwind CSS usage, shadcn/ui components, theme system, responsive design, UI component patterns

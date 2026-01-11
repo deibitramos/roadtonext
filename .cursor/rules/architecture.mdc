@@ -1,0 +1,149 @@
+---
+description: Project architecture and folder structure patterns
+globs: src/**/*
+---
+
+# Architecture Patterns
+
+## Folder Structure
+
+The project follows a **feature-based architecture** where related functionality is grouped together.
+
+### App Router Structure (`src/app/`)
+
+```
+app/
+├── (home)/              # Public home page
+├── (public)/            # Public routes (sign-in, sign-up, etc.)
+├── (app)/                # Authenticated app routes
+│   └── (org_required)/  # Routes requiring organization membership
+├── _navigation/         # Navigation components (Header, Sidebar, etc.)
+├── _providers/          # React context providers
+└── api/                 # API routes
+```
+
+**Route Groups**:
+- `(home)` - Public landing page
+- `(public)` - Public authentication pages
+- `(app)` - Authenticated application pages
+- `(org_required)` - Routes that require active organization membership
+
+### Feature Modules (`src/features/`)
+
+Each feature is self-contained with its own:
+- `actions/` - Server actions for mutations
+- `components/` - Feature-specific React components
+- `queries/` - Data fetching functions (used with React Query)
+- `schemas/` - Zod validation schemas
+- `types.ts` - TypeScript types for the feature
+- `utils/` - Feature-specific utilities
+
+**Example Feature Structure**:
+```
+features/ticket/
+├── actions/
+│   ├── upsertTicket.ts
+│   ├── deleteTicket.ts
+│   └── updateTicketStatus.ts
+├── components/
+│   ├── TicketList.tsx
+│   ├── TicketItem.tsx
+│   └── TicketUpsertForm.tsx
+├── queries/
+│   ├── getTickets.ts
+│   └── getTicket.ts
+├── searchParams.ts      # URL search params parsing
+└── constants.tsx        # Feature constants
+```
+
+### Shared Components (`src/components/`)
+
+Reusable UI components organized by purpose:
+- `form/` - Form-related components and utilities
+- `ui/` - Base UI components (shadcn/ui components)
+- `theme/` - Theme provider and switcher
+- `hooks/` - Shared React hooks
+
+### Core Libraries (`src/lib/`)
+
+Core utilities and configurations:
+- `auth/` - Authentication setup (client/server)
+- `prisma.ts` - Prisma client instance
+- `inngest.ts` - Inngest client
+- `resend.ts` - Resend email client
+- `utils.ts` - Shared utility functions
+
+## Component Patterns
+
+### Server Components (Default)
+
+```typescript
+// Default - Server Component
+export default async function MyPage() {
+  const data = await fetchData();
+  return <div>{data}</div>;
+}
+```
+
+### Client Components
+
+Only use when you need:
+- Interactivity (onClick, onChange, etc.)
+- Browser APIs (localStorage, window, etc.)
+- React hooks (useState, useEffect, etc.)
+- Client-side data fetching (rare - see Data Fetching Patterns)
+
+```typescript
+'use client';
+
+// Only for interactive components, not for data fetching
+export default function MyComponent() {
+  const [state, setState] = useState();
+  return <button onClick={() => setState('clicked')}>Click</button>;
+}
+```
+
+## Data Fetching Patterns
+
+### Server-Side (Default - Preferred)
+
+**Almost all data fetching happens server-side** in Server Components by calling query functions directly:
+
+```typescript
+// Server Component - Direct query function call
+import { getTickets } from '@/features/ticket/queries/getTickets';
+
+export default async function Page({ searchParams }) {
+  const tickets = await getTickets(userId, searchParams, false);
+  return <div>{/* render tickets */}</div>;
+}
+```
+
+Query functions are placed in `features/{feature}/queries/` and can be called from both server and client:
+
+```typescript
+// features/ticket/queries/getTickets.ts
+'use server'; // Mark as server function
+
+export default async function getTickets(userId, searchParams, byOrganization) {
+  // Database access
+  const tickets = await prisma.ticket.findMany({ where: { userId } });
+  return { list: tickets, metadata: { count } };
+}
+```
+
+### Client-Side (Rare)
+
+Client-side data fetching is **almost never used**. Currently, there is only one case in the codebase (infinite scroll for comments).
+
+**When to use client-side fetching**: If you identify a specific use case where client-side fetching would be better than server-side (e.g., infinite scroll, real-time updates, polling, etc.), you may use any appropriate `@tanstack/react-query` hook such as `useQuery()`, `useInfiniteQuery()`, `useSuspenseQuery()`, or others as needed.
+
+**Default approach**: Always prefer server-side data fetching. Fetch initial data in Server Components and pass it as props. Only use client-side fetching when there's a clear benefit that server-side fetching cannot provide.
+
+## Layout Hierarchy
+
+1. **Root Layout** (`app/layout.tsx`) - Providers, fonts, global styles
+2. **Route Group Layouts** - Authentication, navigation, organization checks
+3. **Page Components** - Individual pages
+
+Layouts cascade and can be nested. Use route groups `()` to organize without affecting URL structure.

@@ -1,0 +1,232 @@
+---
+description: Styling patterns with Tailwind CSS and UI components
+alwaysApply: false
+---
+# Styling Patterns
+
+This project uses **Tailwind CSS 4** with **shadcn/ui** components. shadcn/ui uses Radix UI primitives under the hood, but we follow shadcn/ui conventions and patterns.
+
+## Tailwind CSS
+
+### Configuration
+
+- **Version**: Tailwind CSS 4.1.18
+- **Config**: PostCSS-based configuration
+- **Theme**: Custom theme with CSS variables
+
+### Utility Classes
+
+Use Tailwind utility classes for styling:
+
+```typescript
+<div className="flex flex-col gap-y-2 p-4 rounded-lg bg-card">
+  <h2 className="text-lg font-semibold">Title</h2>
+</div>
+```
+
+### Class Name Merging
+
+Use the `cn()` utility for conditional classes:
+
+```typescript
+import { cn } from '@/lib/utils';
+
+<div className={cn(
+  'base-classes',
+  condition && 'conditional-classes',
+  className // Allow prop override
+)} />
+```
+
+## UI Components
+
+### Component Location
+
+Base UI components are in `src/components/ui/`:
+- `button.tsx`
+- `input.tsx`
+- `card.tsx`
+- `select.tsx`
+- `dialog.tsx`
+- etc.
+
+### Using UI Components
+
+```typescript
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+
+<Card>
+  <Input placeholder="Enter text" />
+  <Button variant="default">Submit</Button>
+</Card>
+```
+
+### Component Variants
+
+Components use `class-variance-authority` (CVA) for variants:
+
+```typescript
+// Example button variants
+<Button variant="default">Default</Button>
+<Button variant="destructive">Delete</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="ghost">Ghost</Button>
+<Button size="sm">Small</Button>
+<Button size="lg">Large</Button>
+```
+
+## shadcn/ui Components
+
+The project uses **shadcn/ui** components, which are built on top of Radix UI primitives. We follow shadcn/ui conventions:
+
+- Components are in `src/components/ui/`
+- Use shadcn/ui component APIs and patterns
+- Components are customizable and follow shadcn/ui design principles
+- Underlying Radix UI primitives are abstracted away
+
+## Theme System
+
+### Theme Provider
+
+Theme is managed via `next-themes`:
+
+```typescript
+import ThemeProvider from '@/components/theme/ThemeProvider';
+
+// In root layout
+<ThemeProvider>
+  {children}
+</ThemeProvider>
+```
+
+### Theme Switcher
+
+```typescript
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher';
+
+<ThemeSwitcher />
+```
+
+### CSS Variables
+
+Theme uses CSS variables for colors:
+
+```css
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  /* ... */
+}
+```
+
+## Layout Patterns
+
+### Flexbox Layouts
+
+```typescript
+// Column layout
+<div className="flex flex-col gap-y-4">
+
+// Row layout
+<div className="flex flex-row gap-x-4 items-center">
+
+// Responsive
+<div className="flex flex-col md:flex-row gap-4">
+```
+
+### Grid Layouts
+
+```typescript
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+```
+
+### Spacing
+
+Use consistent spacing scale:
+- `gap-2` (0.5rem)
+- `gap-4` (1rem)
+- `p-4` (padding)
+- `m-4` (margin)
+
+## Form Styling
+
+Form field components handle styling internally using the `Field`, `FieldLabel`, and `FieldError` components from `@/components/ui/field`. Use form field components from `@/components/form/fields/`:
+
+```typescript
+import { InputText } from '@/components/form/fields/InputText';
+
+// Form field with label
+<InputText name="title" label="Title" placeholder="Enter title" />
+
+// Form field without label (label handled elsewhere)
+<InputText name="email" placeholder="Email" />
+```
+
+The form field components automatically handle:
+- Label display (if provided)
+- Input styling
+- Error message display
+- React Hook Form integration
+
+See `forms.mdc` for more details on form field patterns.
+
+## Responsive Design
+
+Use Tailwind breakpoints:
+
+```typescript
+// Mobile first
+<div className="text-sm md:text-base lg:text-lg">
+<div className="hidden md:block">Desktop only</div>
+<div className="block md:hidden">Mobile only</div>
+```
+
+## Icons
+
+Use **Lucide React** for icons. **Always use the "Icon" suffix convention** when importing icons:
+
+```typescript
+import { PlusIcon, TrashIcon, EditIcon } from 'lucide-react';
+
+<Button>
+  <PlusIcon className="w-4 h-4 mr-2" />
+  Add
+</Button>
+```
+
+**Naming Convention**: Always import icons with the "Icon" suffix (e.g., `PlusIcon`, `TrashIcon`, `EditIcon`, `ArrowLeftRightIcon`, `UserCogIcon`, `LoaderCircleIcon`). This convention makes it clear that these are icon components.
+
+## Animation
+
+Use `tw-animate-css` for animations:
+
+```typescript
+<div className="animate-fade-in">
+```
+
+## Best Practices
+
+1. **Use utility classes** - Prefer Tailwind utilities over custom CSS
+2. **Consistent spacing** - Use Tailwind spacing scale
+3. **Responsive design** - Mobile-first approach
+4. **Component composition** - Build complex UIs from base components
+5. **Theme-aware** - Use CSS variables for theme support
+6. **Accessibility** - shadcn/ui components (built on Radix UI) are accessible by default
+7. **Dark mode** - Theme system supports dark mode automatically
+
+## Custom Styles
+
+Global styles are in `src/app/globals.css`:
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Base styles */
+}
+```

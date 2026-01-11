@@ -1,0 +1,331 @@
+---
+description: Form handling patterns with React Hook Form and server actions
+alwaysApply: false
+---
+# Form Patterns
+
+Forms in this project use React Hook Form with Zod validation and call server actions directly from JavaScript handlers.
+
+## Form Component Structure
+
+Use the `useForm` hook and `Form` component:
+
+```typescript
+'use client';
+
+import { toast } from 'sonner';
+import Form from '@/components/form/Form';
+import InputText from '@/components/form/fields/InputText';
+import useForm from '@/components/form/hooks/useForm';
+import SubmitButton from '@/components/form/SubmitButton';
+import { myAction } from '@/features/myfeature/actions/myAction';
+import mySchema from '@/features/myfeature/schemas/mySchema';
+
+function MyForm() {
+  const form = useForm(mySchema, {
+    submit: async (data) => {
+      const { error } = await myAction(data);
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Success message');
+        // Handle success (e.g., reset form, close modal, etc.)
+      }
+    },
+  });
+
+  const { isSubmitting } = form.formHook.formState;
+
+  return (
+    <Form form={form}>
+      <InputText name="title" placeholder="Title" />
+      <SubmitButton isSubmitting={isSubmitting}>Submit</SubmitButton>
+    </Form>
+  );
+}
+```
+
+## Form Fields
+
+Use form field components from `@/components/form/fields/`. These components integrate with React Hook Form using `Controller` and `useFormContext`.
+
+### InputText Component
+
+The `InputText` component is the base pattern for form fields:
+
+```typescript
+import { InputText } from '@/components/form/fields/InputText';
+
+// With label
+<InputText name="title" label="Title" placeholder="Enter title" required />
+
+// Without label (label handled elsewhere)
+<InputText name="email" placeholder="Email" type="email" />
+```
+
+### Creating Other Form Controls
+
+Other form controls (DatePicker, Textarea, Select, Checkbox, Radio buttons, etc.) should follow the same pattern as `InputText`:
+
+1. Use `Controller` from `react-hook-form` to integrate with the form
+2. Use `useFormContext()` to access the form context
+3. Wrap in `Field` component from `@/components/ui/field`
+4. Use `FieldLabel` for labels (if needed)
+5. Use `FieldError` to display validation errors
+6. Accept `name` prop for the field name
+7. Accept other props as needed (label, placeholder, etc.)
+
+Example structure:
+
+```typescript
+import { Controller, useFormContext } from 'react-hook-form';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { YourUIComponent } from '@/components/ui/your-component';
+
+type Props = {
+  name: string;
+  label?: string;
+  // ... other props
+};
+
+export default function YourFormField(props: Props) {
+  const { name, label, ...componentProps } = props;
+  const { control } = useFormContext();
+
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState }) => (
+        <Field>
+          {label && <FieldLabel>{label}</FieldLabel>}
+          <YourUIComponent {...field} {...componentProps} value={field.value || ''} />
+          <FieldError>{fieldState.error?.message}</FieldError>
+        </Field>
+      )}
+    />
+  );
+}
+```
+
+Place new form field components in `src/components/form/fields/` directory.
+
+## Form Validation
+
+Validation happens in two places:
+
+1. **Client-side**: Zod schema validation via React Hook Form resolver (automatic)
+2. **Server-side**: Zod schema validation in server action (always validate on server)
+
+### Schema Definition
+
+```typescript
+// features/myfeature/schemas/mySchema.ts
+import { z } from 'zod/v4';
+
+export const mySchema = z.object({
+  title: z.string().min(1, 'Title is required').max(191),
+  content: z.string().min(1, 'Content is required').max(1024),
+  amount: z.coerce.number().positive('Amount must be positive'),
+});
+
+export type MyData = z.infer<typeof mySchema>;
+```
+
+### Using Schema in Form
+
+The `useForm` hook automatically uses the schema for validation:
+
+```typescript
+const form = useForm(mySchema, {
+  defaultValues: { title: '', content: '' },
+  submit: async (data) => {
+    // data is typed and validated
+    await myAction(data);
+  },
+});
+```
+
+## Pending State
+
+### In Forms
+
+Use `isSubmitting` from React Hook Form's form state:
+
+```typescript
+const { isSubmitting } = form.formHook.formState;
+
+<SubmitButton isSubmitting={isSubmitting}>Submit</SubmitButton>
+```
+
+### For Non-Form Actions
+
+Prefer `useTransition()` over `useState()` for pending state:
+
+```typescript
+import { useTransition } from 'react';
+
+function MyComponent() {
+  const [isPending, startTransition] = useTransition();
+
+  const handleAction = () => {
+    startTransition(async () => {
+      const result = await myAction();
+      if (result.error) {
+        toast.error(result.error.message);
+      } else {
+        toast.success('Success!');
+      }
+    });
+  };
+
+  return (
+    <SubmitButton type="button" onClick={handleAction} isSubmitting={isPending}>
+      Action
+    </SubmitButton>
+  );
+}
+```
+
+## SubmitButton Component
+
+The `SubmitButton` component:
+- Accepts `isSubmitting` prop for pending state
+- Can receive `type="button"` when used outside a form (for non-form actions)
+- Automatically shows loading spinner when pending
+- Can accept an `icon` prop
+
+```typescript
+// In a form
+<SubmitButton isSubmitting={isSubmitting}>Submit</SubmitButton>
+
+// Outside a form (button action)
+import { ArrowLeftRightIcon } from 'lucide-react';
+
+<SubmitButton
+  type="button"
+  onClick={handleAction}
+  isSubmitting={isPending}
+  icon={ArrowLeftRightIcon}
+>
+  Switch
+</SubmitButton>
+```
+
+## Toast Patterns
+
+### Same Page (No Redirect)
+
+When the server action doesn't redirect, handle toasts in the form submit handler:
+
+```typescript
+const form = useForm(mySchema, {
+  submit: async (data) => {
+    const { error } = await myAction(data);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Success message');
+      // Handle success (reset form, close modal, etc.)
+    }
+  },
+});
+```
+
+### With Redirect
+
+When the server action redirects, **do not show success toast in the handler**. The server action should use `setCookie('toast', '...')` instead:
+
+```typescript
+// In form component - NO success toast
+const form = useForm(mySchema, {
+  submit: async (data) => {
+    const { error } = await myAction(data);
+    if (error) {
+      toast.error(error.message);
+    }
+    // On success, action redirects - no need to handle here
+  },
+});
+
+// In server action
+'use server';
+
+const myAction = async (data: MyData) => {
+  // ... validation and database operations ...
+
+  await setCookie('toast', 'Success message');
+  redirect('/path');
+
+  return actionSuccess();
+};
+```
+
+The toast will be displayed on the redirected page via the toast cookie mechanism.
+
+## Form Patterns
+
+### Create Form
+
+```typescript
+function CreateForm() {
+  const form = useForm(createSchema, {
+    submit: async (data) => {
+      const { error } = await createAction(data);
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Created successfully');
+        form.formHook.reset();
+      }
+    },
+  });
+
+  const { isSubmitting } = form.formHook.formState;
+
+  return (
+    <Form form={form}>
+      <InputText name="name" placeholder="Name" />
+      <SubmitButton isSubmitting={isSubmitting}>Create</SubmitButton>
+    </Form>
+  );
+}
+```
+
+### Edit Form
+
+```typescript
+function EditForm({ id, initialData }) {
+  const form = useForm(updateSchema, {
+    defaultValues: initialData,
+    submit: async (data) => {
+      const { error } = await updateAction(id, data);
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Updated successfully');
+      }
+    },
+  });
+
+  const { isSubmitting } = form.formHook.formState;
+
+  return (
+    <Form form={form}>
+      <InputText name="title" placeholder="Title" />
+      <SubmitButton isSubmitting={isSubmitting}>Update</SubmitButton>
+    </Form>
+  );
+}
+```
+
+## Best Practices
+
+1. **Always validate on server** - Client validation can be bypassed
+2. **Use Zod schemas** - Single source of truth for validation
+3. **Handle pending state** - Use `isSubmitting` from form state for forms, `useTransition()` for non-form actions
+4. **Toast handling** - Show error toasts in handler, success toasts only if no redirect (use `setCookie` for redirects)
+5. **Form reset** - Reset form after successful submission if staying on same page
+6. **Type safety** - Export and use TypeScript types from Zod schemas
