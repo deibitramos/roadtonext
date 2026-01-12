@@ -11,14 +11,16 @@ import {
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import getMemberships from '../queries/getMemberships';
 import MembershipDeleteButton from './MembershipDeleteButton';
+import MembershipMoreMenu from './MembershipMoreMenu';
+import PermissionToggle from './PermissionToggle';
 
 type Props = {
 	organizationId: string;
 };
 
-const headers = ['Name', 'Email', 'Joined At', 'Verified Email', ''].map((header) => (
-	<TableHead key={header}>{header}</TableHead>
-));
+const headers = ['Name', 'Email', 'Joined At', 'Verified Email', 'Can Delete Ticket'].map(
+	(header) => <TableHead key={header}>{header}</TableHead>,
+);
 
 async function MembershipList({ organizationId }: Props) {
 	const user = await getSessionUserOrRedirect();
@@ -33,11 +35,18 @@ async function MembershipList({ organizationId }: Props) {
 				{memberships.map((membership) => {
 					const myself = membership.userId === user.id;
 					const buttons = (
-						<MembershipDeleteButton
-							userId={membership.userId}
-							organizationId={organizationId}
-							myself={myself}
-						/>
+						<>
+							<MembershipMoreMenu
+								userId={membership.userId}
+								organizationId={membership.organizationId}
+								membershipRole={membership.role}
+							/>
+							<MembershipDeleteButton
+								userId={membership.userId}
+								organizationId={organizationId}
+								myself={myself}
+							/>
+						</>
 					);
 
 					return (
@@ -46,6 +55,14 @@ async function MembershipList({ organizationId }: Props) {
 							<TableCell>{membership.user.email}</TableCell>
 							<TableCell>{format(membership.joinedAt, 'yyyy-MM-dd, HH:mm')}</TableCell>
 							<TableCell>{membership.user.emailVerified ? <CheckIcon /> : <BanIcon />}</TableCell>
+							<TableCell>
+								<PermissionToggle
+									userId={membership.userId}
+									organizationId={organizationId}
+									permission="canDeleteTicket"
+									value={membership.canDeleteTicket}
+								/>
+							</TableCell>
 							<TableCell className="flex justify-end gap-x-2">{buttons}</TableCell>
 						</TableRow>
 					);

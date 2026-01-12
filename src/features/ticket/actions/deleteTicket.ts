@@ -13,11 +13,12 @@ const deleteTicket = async (id: string) => {
 	const ticket = await prisma.ticket.findUnique({ where: { id } });
 	if (!ticket || !isOwner(user, ticket)) return toActionState('Not authorized', 'ERROR');
 
+	const ticketOrganization = user.organizations.find((o) => o.id === ticket.organizationId);
+	if (!ticketOrganization?.canDeleteTicket) return toActionState('Not authorized', 'ERROR');
+
 	await prisma.ticket.delete({ where: { id } });
 	revalidatePath('/tickets');
-
 	await setCookie('toast', 'Ticket deleted');
-
 	redirect('/tickets');
 };
 

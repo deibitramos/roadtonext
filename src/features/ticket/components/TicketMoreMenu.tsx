@@ -14,14 +14,14 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { Ticket } from '@/generated/prisma/client';
 import { getKeys } from '@/lib/utils';
 import deleteTicket from '../actions/deleteTicket';
 import updateTicketStatus from '../actions/updateTicketStatus';
 import { TICKET_STATUS } from '../constants';
+import type { TicketWithUser } from '../queries/getTicket';
 
 type Props = {
-	ticket: Ticket;
+	ticket: TicketWithUser;
 };
 
 function TicketMoreMenu({ ticket }: Props) {
@@ -56,7 +56,7 @@ function TicketMoreMenu({ ticket }: Props) {
 						))}
 					</DropdownMenuRadioGroup>
 					<DropdownMenuSeparator />
-					<DropdownMenuItem onSelect={openModal}>
+					<DropdownMenuItem disabled={!ticket.permissions.canDeleteTicket} onSelect={openModal}>
 						<TrashIcon className="h-4 w-4" />
 						<span>Delete</span>
 					</DropdownMenuItem>

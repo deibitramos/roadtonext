@@ -1,7 +1,7 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
-import hasMembership from '@/features/organization/queries/hasMembership';
+import getUserMembership from '@/features/membership/actions/getUserMembership';
 import { auth } from './server';
 
 export const getAuthSession = cache(async () => {
@@ -28,11 +28,11 @@ export const getSessionUserOrRedirect = cache(async (options: SessionOptions = {
 		redirect('/email-verify');
 	}
 
-	const membership = await hasMembership(userSession.user.id);
-	if (!skipHasOrgCheck && !membership.hasMembership) redirect('/onboarding');
-	if (!skipActiveOrgCheck && !membership.activeMembershipId) redirect('/onboarding/select-active');
+	const { organizations, activeMembershipId } = await getUserMembership(userSession.user.id);
+	if (!skipHasOrgCheck && !organizations.length) redirect('/onboarding');
+	if (!skipActiveOrgCheck && !activeMembershipId) redirect('/onboarding/select-active');
 
-	return { ...userSession.user, activeMembershipId: membership.activeMembershipId };
+	return { ...userSession.user, activeMembershipId, organizations };
 });
 
 export const getSessionUserOrUndefined = cache(async () => {
@@ -53,6 +53,6 @@ export const redirectIfAuthenticated = cache(async () => {
 export const redirectIfHasActiveOrganization = cache(async () => {
 	const session = await getAuthSession();
 	if (!session?.user) return;
-	const membership = await hasMembership(session.user.id);
-	if (membership.activeMembershipId) redirect('/organization');
+	const { activeMembershipId } = await getUserMembership(session.user.id);
+	if (activeMembershipId) redirect('/organization');
 });
