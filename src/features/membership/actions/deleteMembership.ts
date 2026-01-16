@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { getErrorMessage } from 'react-error-boundary';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import prisma from '@/lib/prisma';
 import { actionError, actionSuccess } from '@/lib/types';
@@ -36,7 +37,7 @@ const deleteMembership = async (userId: string, organizationId: string) => {
 			where: { userId_organizationId: { userId, organizationId } },
 		});
 	} catch (error) {
-		const message = error instanceof Error ? error.message : 'An unknown error occurred';
+		const message = getErrorMessage(error) ?? 'An unknown error occurred';
 		return actionError(message);
 	}
 

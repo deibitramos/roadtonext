@@ -1,9 +1,10 @@
 import { serve } from 'inngest/next';
 import eventSignUp from '@/features/auth/events/eventSignUp';
+import invitationSendEvent from '@/features/invitation/events/invitationSendEvent';
 import eventPasswordReset from '@/features/password/events/eventPasswordReset';
 import inngest from '@/lib/inngest';
 
 export const { GET, POST, PUT } = serve({
 	client: inngest,
-	functions: [eventPasswordReset, eventSignUp],
+	functions: [eventPasswordReset, eventSignUp, invitationSendEvent],
 });

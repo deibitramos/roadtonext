@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { getErrorMessage } from 'react-error-boundary';
 import getAdminOrRedirect from '@/features/membership/queries/getAdminOrRedirect';
 import prisma from '@/lib/prisma';
 import { actionError, actionSuccess } from '@/lib/types';
@@ -16,7 +17,7 @@ const deleteOrganization = async (organizationId: string) => {
 
 		await prisma.organization.delete({ where: { id: organizationId } });
 	} catch (error) {
-		const message = error instanceof Error ? error.message : 'An unknown error occurred';
+		const message = getErrorMessage(error) ?? 'An unknown error occurred';
 		return actionError(message);
 	}
 

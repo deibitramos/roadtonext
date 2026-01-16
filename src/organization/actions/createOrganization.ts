@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { getErrorMessage } from 'react-error-boundary';
 import { setCookie } from '@/actions/cookies';
 import createOrganizationSchema, {
 	type CreateOrganizationData,
@@ -37,7 +38,8 @@ const createOrganization = async (data: CreateOrganizationData) => {
 
 		revalidatePath('/organization');
 	} catch (error) {
-		return actionError(error instanceof Error ? error.message : 'Failed to create organization');
+		const message = getErrorMessage(error) ?? 'Failed to create organization';
+		return actionError(message);
 	}
 	await setCookie('toast', 'Organization created');
 	redirect('/organization');

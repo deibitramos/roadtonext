@@ -14,6 +14,28 @@ model Organization {
   updatedAt   DateTime     @updatedAt
   memberships Membership[]
   tickets     Ticket[]
+  invitations Invitation[]
+}
+
+model Invitation {
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  tokenHash       String           @unique
+  email           String
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId  String
+  invitedByUser   User?            @relation(fields: [invitedByUserId], references: [id], onDelete: SetNull)
+  invitedByUserId String?
+  status          InvitationStatus @default(PENDING)
+
+  @@unique([email, organizationId])
+  @@index([organizationId])
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED_WITHOUT_ACCOUNT
+  ACCEPTED_WITH_ACCOUNT
 }
 
 model Membership {
@@ -53,6 +75,7 @@ model User {
   accounts        Account[]
   tickets         Ticket[]
   comments        Comment[]
+  invitations     Invitation[]
 
   @@unique([email])
   @@unique([username])

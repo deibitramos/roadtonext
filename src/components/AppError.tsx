@@ -1,11 +1,13 @@
+import { getErrorMessage } from 'react-error-boundary';
 import Placeholder from './Placeholder';
 
 type Props = {
-	error: Error;
+	error: unknown;
 };
 
 function AppError({ error }: Props) {
-	return <Placeholder label={error.message || 'Something went wrong'} />;
+	const message = getErrorMessage(error) ?? 'Something went wrong';
+	return <Placeholder label={message} />;
 }
 
 export default AppError;

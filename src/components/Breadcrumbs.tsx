@@ -1,4 +1,4 @@
-import { SlashIcon } from 'lucide-react';
+import { ChevronDownIcon, SlashIcon } from 'lucide-react';
 import type { Route } from 'next';
 import Link from 'next/link';
 import { Fragment } from 'react';
@@ -10,8 +10,18 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from './ui/breadcrumb';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
-export type BreadcrumbData = { title: string; href?: Route };
+export type BreadcrumbData = {
+	title: string;
+	href?: Route;
+	dropdown?: { title: string; href: Route }[];
+};
 
 type BreadcrumbsProps = {
 	breadcrumbs: BreadcrumbData[];
@@ -31,6 +41,24 @@ const Breadcrumbs = ({ breadcrumbs }: BreadcrumbsProps) => {
 									{breadcrumb.title}
 								</Link>
 							</BreadcrumbLink>
+						);
+					}
+
+					if (breadcrumb.dropdown) {
+						breadcrumbItem = (
+							<DropdownMenu>
+								<DropdownMenuTrigger className="flex items-center gap-1">
+									{breadcrumb.title}
+									<ChevronDownIcon className="size-4" />
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="start">
+									{breadcrumb.dropdown.map((item) => (
+										<DropdownMenuItem key={item.href} asChild>
+											<Link href={item.href}>{item.title}</Link>
+										</DropdownMenuItem>
+									))}
+								</DropdownMenuContent>
+							</DropdownMenu>
 						);
 					}
 

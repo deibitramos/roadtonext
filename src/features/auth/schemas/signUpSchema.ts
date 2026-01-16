@@ -17,4 +17,6 @@ const signUpSchema = z
 		}
 	});
 
+export type SignUpData = z.infer<typeof signUpSchema>;
+
 export default signUpSchema;

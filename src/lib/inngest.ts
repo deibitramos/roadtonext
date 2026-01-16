@@ -3,6 +3,9 @@ import { EventSchemas, Inngest } from 'inngest';
 type Events = {
 	'app/password.password-reset': { data: { email: string; url: string } };
 	'app/auth.sign-up': { data: { email: string; otp: string } };
+	'app/invitation.send': {
+		data: { userId: string; organizationId: string; email: string; invitationLink: string };
+	};
 };
 
 const inngest = new Inngest({

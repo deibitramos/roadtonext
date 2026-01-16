@@ -1,3 +1,4 @@
+import { getErrorMessage } from 'react-error-boundary';
 import { ZodError, z } from 'zod/v4';
 
 type ActionStatus = 'SUCCESS' | 'ERROR';
@@ -22,7 +23,7 @@ export const fromErrorToActionState = <T = never>(
 		return { message: '', fieldErrors, payload: formData, status: 'ERROR', timestamp: Date.now() };
 	}
 
-	const message = error instanceof Error ? error.message : 'An unknown error occurred';
+	const message = getErrorMessage(error) ?? 'An unknown error occurred';
 	return { message, payload: formData, status: 'ERROR', timestamp: Date.now() };
 };
 
