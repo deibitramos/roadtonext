@@ -13,9 +13,7 @@ export const auth = betterAuth({
 			overrideDefaultEmailVerification: true,
 			async sendVerificationOTP(params) {
 				const { email, otp, type } = params;
-				console.log('params', params);
 				if (type !== 'email-verification') return;
-				console.log('inside sendVerificationOTP', email, otp);
 				await inngest.send({ name: 'app/auth.sign-up', data: { email, otp } });
 			},
 		}),
@@ -25,7 +23,6 @@ export const auth = betterAuth({
 		enabled: true,
 		minPasswordLength: 6,
 		sendResetPassword: async ({ user, url }) => {
-			console.log('inside sendresetpassword', user, url);
 			await inngest.send({ name: 'app/password.password-reset', data: { email: user.email, url } });
 		},
 	},

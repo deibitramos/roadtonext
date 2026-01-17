@@ -1,8 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getErrorMessage } from 'react-error-boundary';
 import getAdminOrRedirect from '@/features/membership/queries/getAdminOrRedirect';
+import { getErrorMessage } from '@/lib/error';
 import inngest from '@/lib/inngest';
 import prisma from '@/lib/prisma';
 import { actionError, actionSuccess } from '@/lib/types';
@@ -30,9 +30,8 @@ const createInvitation = async (organizationId: string, data: CreateInvitationDa
 			name: 'app/invitation.send',
 			data: { userId: user.id, organizationId, email, invitationLink },
 		});
-		console.log('queue sent for', email);
 	} catch (error) {
-		const message = getErrorMessage(error) ?? 'Failed to create invitation';
+		const message = getErrorMessage(error, 'Failed to create invitation');
 		return actionError(message);
 	}
 

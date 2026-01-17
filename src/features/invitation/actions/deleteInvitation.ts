@@ -5,18 +5,14 @@ import getAdminOrRedirect from '@/features/membership/queries/getAdminOrRedirect
 import prisma from '@/lib/prisma';
 import { actionError, actionSuccess } from '@/lib/types';
 
-const deleteInvitation = async (email: string, organizationId: string) => {
-	await getAdminOrRedirect(organizationId);
-
-	const invitation = await prisma.invitation.findUnique({
-		where: { email_organizationId: { email, organizationId } },
-	});
-
+const deleteInvitation = async (id: string) => {
+	const invitation = await prisma.invitation.findUnique({ where: { id } });
 	if (!invitation) {
 		return actionError('Invitation not found');
 	}
 
-	await prisma.invitation.delete({ where: { email_organizationId: { email, organizationId } } });
+	await getAdminOrRedirect(invitation.organizationId);
+	await prisma.invitation.delete({ where: { id } });
 
 	revalidatePath(`/organization/${invitation.organizationId}/invitations`);
 	return actionSuccess();

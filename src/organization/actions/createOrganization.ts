@@ -2,12 +2,12 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { getErrorMessage } from 'react-error-boundary';
 import { setCookie } from '@/actions/cookies';
 import createOrganizationSchema, {
 	type CreateOrganizationData,
 } from '@/features/organization/schemas/createOrganizationSchema';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
+import { getErrorMessage } from '@/lib/error';
 import prisma from '@/lib/prisma';
 import { actionError } from '@/lib/types';
 
@@ -38,7 +38,7 @@ const createOrganization = async (data: CreateOrganizationData) => {
 
 		revalidatePath('/organization');
 	} catch (error) {
-		const message = getErrorMessage(error) ?? 'Failed to create organization';
+		const message = getErrorMessage(error, 'Failed to create organization');
 		return actionError(message);
 	}
 	await setCookie('toast', 'Organization created');

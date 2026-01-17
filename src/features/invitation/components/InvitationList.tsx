@@ -35,16 +35,16 @@ async function InvitationList({ organizationId }: InvitationListProps) {
 			<TableBody>
 				{invitations.map((invitation) => {
 					return (
-						<TableRow key={invitation.email}>
+						<TableRow key={invitation.id}>
 							<TableCell>{invitation.email}</TableCell>
 							<TableCell>{format(invitation.createdAt, 'yyyy-MM-dd, HH:mm')}</TableCell>
 							<TableCell>
 								{invitation.invitedByUser
-									? `${invitation.invitedByUser.username} (${invitation.invitedByUser.email})`
+									? `${invitation.invitedByUser.name} (${invitation.invitedByUser.email})`
 									: 'Deleted User'}
 							</TableCell>
 							<TableCell className="flex justify-end gap-x-2">
-								<InvitationDeleteButton email={invitation.email} organizationId={organizationId} />
+								<InvitationDeleteButton id={invitation.id} />
 							</TableCell>
 						</TableRow>
 					);

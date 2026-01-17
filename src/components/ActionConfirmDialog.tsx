@@ -57,7 +57,6 @@ function ConfirmDialog<T = never>({
 
 	useActionFeedback(actionState, {
 		onSuccess: ({ actionState }) => {
-			console.log('ActionForm onSuccess', actionState);
 			if (!actionState.message) return;
 			toast.success(actionState.message);
 			handleSuccess();

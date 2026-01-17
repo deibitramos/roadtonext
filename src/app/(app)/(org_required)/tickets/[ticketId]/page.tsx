@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { type BreadcrumbData, Breadcrumbs } from '@/components/Breadcrumbs';
 import { Separator } from '@/components/ui/separator';
+import Attachments from '@/features/attachments/components/Attachments';
 import Comments from '@/features/comment/components/Comments';
 import getComments from '@/features/comment/queries/getComments';
 import TicketItem from '@/features/ticket/components/TicketItem';
@@ -34,6 +35,7 @@ export default async function TicketPage({ params }: Props) {
 			<Separator />
 			<div className="flex justify-center animate-fade-from-top">
 				<TicketItem ticket={ticket} isDetail>
+					<Attachments ticketId={ticket.id} owner={ticket.owner} />
 					<Comments paginatedComments={paginatedComments} ticketId={ticket.id} key={ticket.id} />
 				</TicketItem>
 			</div>

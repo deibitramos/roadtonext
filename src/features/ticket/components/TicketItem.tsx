@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { toCurrencyFromCent } from '@/lib/currency';
 import { cn } from '@/lib/utils';
-import { toCurrencyFromCent } from '@/utils/currency';
 import { TICKET_STATUS } from '../constants';
 import type { TicketWithUser } from '../queries/getTicket';
 import EditButton from './EditButton';

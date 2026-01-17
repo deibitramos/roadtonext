@@ -1,4 +1,4 @@
-import { getErrorMessage } from 'react-error-boundary';
+import { getErrorMessage } from '@/lib/error';
 import Placeholder from './Placeholder';
 
 type Props = {
@@ -6,7 +6,7 @@ type Props = {
 };
 
 function AppError({ error }: Props) {
-	const message = getErrorMessage(error) ?? 'Something went wrong';
+	const message = getErrorMessage(error);
 	return <Placeholder label={message} />;
 }
 

@@ -8,11 +8,10 @@ import { Button } from '@/components/ui/button';
 import deleteInvitation from '../actions/deleteInvitation';
 
 type Props = {
-	email: string;
-	organizationId: string;
+	id: string;
 };
 
-function InvitationDeleteButton({ email, organizationId }: Props) {
+function InvitationDeleteButton({ id }: Props) {
 	const [open, openModal, closeModal] = useModal();
 	const onSuccess = () => toast.success('Invitation deleted');
 
@@ -24,7 +23,7 @@ function InvitationDeleteButton({ email, organizationId }: Props) {
 			<ConfirmDialog
 				open={open}
 				closeModal={closeModal}
-				action={deleteInvitation.bind(null, email, organizationId)}
+				action={deleteInvitation.bind(null, id)}
 				onSuccess={onSuccess}
 			/>
 		</>

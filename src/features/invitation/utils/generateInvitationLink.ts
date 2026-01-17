@@ -1,6 +1,6 @@
 import { generateRandomString, hashPassword } from 'better-auth/crypto';
 import prisma from '@/lib/prisma';
-import getBaseUrl from '@/utils/url';
+import getBaseUrl from '@/lib/url';
 
 const generateInvitationLink = async (
 	invitedByUserId: string,
@@ -12,11 +12,11 @@ const generateInvitationLink = async (
 	const tokenId = generateRandomString(32);
 	const tokenHash = await hashPassword(tokenId);
 
-	await prisma.invitation.create({
+	const invitation = await prisma.invitation.create({
 		data: { tokenHash, invitedByUserId, organizationId, email },
 	});
 
-	return `${getBaseUrl()}/invitation/${tokenId}`;
+	return `${getBaseUrl()}/invitation/${invitation.id}?token=${tokenId}`;
 };
 
 export default generateInvitationLink;

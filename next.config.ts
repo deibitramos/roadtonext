@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
 	/* config options here */
 	reactCompiler: true,
 	typedRoutes: true,
+	experimental: {
+		serverActions: { bodySizeLimit: '4mb' },
+	},
 };
 
 export default nextConfig;

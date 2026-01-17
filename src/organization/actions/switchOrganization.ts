@@ -1,8 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getErrorMessage } from 'react-error-boundary';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
+import { getErrorMessage } from '@/lib/error';
 import prisma from '@/lib/prisma';
 import { actionError, actionSuccess } from '@/lib/types';
 
@@ -29,7 +29,7 @@ const switchOrganization = async (organizationId: string) => {
 		revalidatePath('/organization');
 		return actionSuccess();
 	} catch (error) {
-		const message = getErrorMessage(error) ?? 'Failed to switch organization';
+		const message = getErrorMessage(error, 'Failed to switch organization');
 		return actionError(message);
 	}
 };

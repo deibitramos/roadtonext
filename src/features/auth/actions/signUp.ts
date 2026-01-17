@@ -1,6 +1,10 @@
+'use server';
+
+import { redirect } from 'next/navigation';
+import { setCookie } from '@/actions/cookies';
 import { auth } from '@/lib/auth/server';
 import prisma from '@/lib/prisma';
-import { actionError, actionSuccess } from '@/lib/types';
+import { actionError } from '@/lib/types';
 import type { SignUpData } from '../schemas/signUpSchema';
 import signUpSchema from '../schemas/signUpSchema';
 
@@ -12,17 +16,15 @@ const signUp = async (data: SignUpData) => {
 
 	const { name, email, password } = parsedData.data;
 
-	const result = await auth.api.signUpEmail({
-		body: { name, email, password },
-	});
-
+	const result = await auth.api.signUpEmail({ body: { name, email, password } });
 	if (!result) {
 		return actionError('Failed to sign up');
 	}
 
 	await reviewInvitations(result.user.id, email);
 
-	return actionSuccess();
+	await setCookie('toast', 'Account created! Please check your email for verification code.');
+	redirect('/email-verify');
 };
 
 const reviewInvitations = async (userId: string, email: string) => {

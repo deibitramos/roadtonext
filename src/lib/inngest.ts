@@ -6,6 +6,9 @@ type Events = {
 	'app/invitation.send': {
 		data: { userId: string; organizationId: string; email: string; invitationLink: string };
 	};
+	'app/attachment.delete': {
+		data: { attachmentId: string; organizationId: string; ticketId: string; fileName: string };
+	};
 };
 
 const inngest = new Inngest({

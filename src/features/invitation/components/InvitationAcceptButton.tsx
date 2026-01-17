@@ -6,15 +6,16 @@ import SubmitButton from '@/components/form/SubmitButton';
 import acceptInvitation from '../actions/acceptInvitation';
 
 type Props = {
+	id: string;
 	tokenId: string;
 };
 
-function InvitationAcceptButton({ tokenId }: Props) {
+function InvitationAcceptButton({ id, tokenId }: Props) {
 	const [isPending, startTransition] = useTransition();
 
 	const handleAccept = () => {
 		startTransition(async () => {
-			const { error } = await acceptInvitation(tokenId);
+			const { error } = await acceptInvitation(id, tokenId);
 			if (error) {
 				toast.error(error.message);
 			}

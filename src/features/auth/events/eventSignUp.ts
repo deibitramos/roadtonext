@@ -7,7 +7,6 @@ const eventSignUp = inngest.createFunction(
 	{ event: 'app/auth.sign-up' },
 	async ({ event }) => {
 		const { email, otp } = event.data;
-		console.log('inside signup event', event.data);
 
 		const user = await prisma.user.findUnique({ where: { email } });
 		if (!user) return;

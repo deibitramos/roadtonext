@@ -14,10 +14,8 @@ const useActionFeedback = <T>(
 	const isUpdate = prevTimestamp.current !== actionState.timestamp;
 
 	useEffect(() => {
-		console.log('useActionFeedback', { isUpdate, actionState });
 		if (!isUpdate) return;
 		if (actionState.status === 'SUCCESS') {
-			console.log('useActionFeedback SUCCESS');
 			options.onSuccess?.({ actionState });
 		}
 		if (actionState.status === 'ERROR') {

@@ -19,7 +19,6 @@ function ActionForm<T>({
 }: PropsWithChildren<Props<T>>) {
 	useActionFeedback(actionState, {
 		onSuccess: ({ actionState }) => {
-			console.log('ActionForm onSuccess', actionState);
 			onSuccess?.(actionState);
 			if (!actionState.message) return;
 			toast.success(actionState.message);
