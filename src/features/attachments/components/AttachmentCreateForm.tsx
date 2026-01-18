@@ -1,26 +1,32 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { toast } from 'sonner';
 import Form from '@/components/form/Form';
 import InputFile from '@/components/form/fields/InputFile';
 import useForm from '@/components/form/hooks/useForm';
 import SubmitButton from '@/components/form/SubmitButton';
+import type { AttachmentEntity } from '@/generated/prisma/client';
 import createAttachment from '../actions/createAttachment';
 import { ACCEPTED } from '../constants';
 import createAttachmentSchema from '../schemas/createAttachmentSchema';
 
 type Props = {
-	ticketId: string;
+	entityId: string;
+	entity: AttachmentEntity;
+	buttons?: ReactNode;
+	onSuccess?: () => void;
 };
 
-function AttachmentCreateForm({ ticketId }: Props) {
+function AttachmentCreateForm({ entityId, entity, buttons, onSuccess }: Props) {
 	const form = useForm(createAttachmentSchema, {
 		submit: async (data) => {
-			const { error } = await createAttachment(ticketId, data);
+			const { error } = await createAttachment(entity, entityId, data);
 			if (error) {
 				toast.error(error.message);
 			} else {
 				toast.success('Attachment(s) uploaded');
+				onSuccess?.();
 			}
 		},
 	});
@@ -28,7 +34,7 @@ function AttachmentCreateForm({ ticketId }: Props) {
 	return (
 		<Form form={form}>
 			<InputFile name="files" id="files" multiple accept={ACCEPTED.join(',')} />
-			<SubmitButton>Upload</SubmitButton>
+			{buttons || <SubmitButton>Upload</SubmitButton>}
 		</Form>
 	);
 }

@@ -8,10 +8,10 @@ import deleteComment from '../actions/deleteComment';
 
 type Props = {
 	id: string;
-	onDelete?: (id: string) => void;
+	refresh: () => void;
 };
 
-function CommentDeleteButton({ id, onDelete }: Props) {
+function CommentDeleteButton({ id, refresh }: Props) {
 	const [open, openModal, closeModal] = useModal();
 
 	return (
@@ -23,7 +23,7 @@ function CommentDeleteButton({ id, onDelete }: Props) {
 				open={open}
 				closeModal={closeModal}
 				action={deleteComment.bind(null, id)}
-				onSuccess={() => onDelete?.(id)}
+				onSuccess={refresh}
 			/>
 		</>
 	);

@@ -7,25 +7,40 @@ import { getErrorMessage } from '@/lib/error';
 import inngest from '@/lib/inngest';
 import prisma from '@/lib/prisma';
 import { actionError, actionSuccess } from '@/lib/types';
+import { isTicket } from '../types';
 
 const deleteAttachment = async (id: string) => {
 	const user = await getSessionUserOrRedirect();
 	const attachment = await prisma.attachment.findUniqueOrThrow({
 		where: { id },
-		include: { ticket: true },
+		include: {
+			ticket: true,
+			comment: {
+				include: { ticket: true },
+			},
+		},
 	});
 
-	if (!isOwner(user, attachment.ticket)) {
+	const subject = attachment.ticket ?? attachment.comment;
+	if (!subject) {
+		return actionError('Subject not found');
+	}
+
+	if (!isOwner(user, subject)) {
 		return actionError('Not authorized');
 	}
 
 	try {
 		await prisma.attachment.delete({ where: { id } });
+		const organizationId = isTicket(subject)
+			? subject.organizationId
+			: subject.ticket.organizationId;
 
 		const dataForEvent = {
 			attachmentId: id,
-			organizationId: attachment.ticket.organizationId,
-			ticketId: attachment.ticketId,
+			organizationId,
+			entity: attachment.entity,
+			entityId: subject.id,
 			fileName: attachment.name,
 		};
 		await inngest.send({ name: 'app/attachment.delete', data: dataForEvent });
@@ -33,7 +48,8 @@ const deleteAttachment = async (id: string) => {
 		return actionError(getErrorMessage(error));
 	}
 
-	revalidatePath(`/tickets/${attachment.ticketId}`);
+	const ticketId = isTicket(subject) ? subject.id : subject.ticket.id;
+	revalidatePath(`/tickets/${ticketId}`);
 	return actionSuccess();
 };
 

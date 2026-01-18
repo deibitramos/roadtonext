@@ -1,43 +1,42 @@
 'use server';
 
-import { revalidatePath } from 'next/dist/server/web/spec-extension/revalidate';
-import { z } from 'zod';
-import {
-	type ActionState,
-	fromErrorToActionState,
-	toActionState,
-} from '@/components/form/utils/toActionState';
+import { revalidatePath } from 'next/cache';
+import isOwner from '@/features/auth/utils/isOwner';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
+import { getErrorMessage } from '@/lib/error';
 import prisma from '@/lib/prisma';
+import { actionError, actionSuccess } from '@/lib/types';
 import type { CommentWithUser } from '../queries/getComments';
+import createCommentSchema, { type CreateCommentData } from '../schemas/createCommentSchema';
 
-const createCommentSchema = z.object({
-	content: z.string().min(1).max(1024),
-});
-
-const createComment = async (
-	ticketId: string,
-	_actionState: ActionState<CommentWithUser>,
-	formData: FormData,
-): Promise<ActionState<CommentWithUser>> => {
+const createComment = async (ticketId: string, data: CreateCommentData) => {
 	const user = await getSessionUserOrRedirect();
 
-	let comment: CommentWithUser;
-
-	try {
-		const data = createCommentSchema.parse(Object.fromEntries(formData));
-		const dbComment = await prisma.comment.create({
-			data: { userId: user.id, ticketId: ticketId, ...data },
-			include: { user: true },
-		});
-		comment = { ...dbComment, owner: true };
-	} catch (error) {
-		return fromErrorToActionState(error);
+	const result = createCommentSchema.safeParse(data);
+	if (!result.success) {
+		return actionError(result.error.issues[0]?.message || 'Invalid data');
 	}
 
-	revalidatePath(`/tickets/${ticketId}`);
+	try {
+		const dbComment = await prisma.comment.create({
+			data: { userId: user.id, ticketId, ...result.data },
+			include: {
+				user: { select: { name: true } },
+				attachments: true,
+			},
+		});
 
-	return toActionState('Comment created successfully', 'SUCCESS', comment);
+		const comment: CommentWithUser = {
+			...dbComment,
+			owner: isOwner(user, dbComment),
+		};
+
+		revalidatePath(`/tickets/${ticketId}`);
+		return actionSuccess(comment);
+	} catch (error) {
+		const message = getErrorMessage(error, 'Failed to create comment');
+		return actionError(message);
+	}
 };
 
 export default createComment;

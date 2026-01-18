@@ -1,35 +1,41 @@
 'use client';
 
-import { useActionState } from 'react';
-import ActionForm from '@/components/form/ActionForm';
-import FieldError from '@/components/form/FieldError';
+import { toast } from 'sonner';
+import Form from '@/components/form/Form';
+import InputTextarea from '@/components/form/fields/InputTextarea';
+import useForm from '@/components/form/hooks/useForm';
 import SubmitButton from '@/components/form/SubmitButton';
-import { type ActionState, EMPTY_ACTION_STATE } from '@/components/form/utils/toActionState';
-import { Textarea } from '@/components/ui/textarea';
 import createComment from '../actions/createComment';
-import type { CommentWithUser } from '../queries/getComments';
+import createCommentSchema from '../schemas/createCommentSchema';
 
 type Props = {
 	ticketId: string;
-	onCreate?(comment: CommentWithUser | undefined): void;
+	refresh: () => void;
 };
 
-function CreateForm({ ticketId, onCreate }: Props) {
-	const [actionState, action] = useActionState(
-		createComment.bind(null, ticketId),
-		EMPTY_ACTION_STATE as ActionState<CommentWithUser>,
-	);
+function CreateForm({ ticketId, refresh }: Props) {
+	const form = useForm(createCommentSchema, {
+		defaultValues: { content: '' },
+		submit: async (data) => {
+			const result = await createComment(ticketId, data);
 
-	const handleSuccess = (actionState: ActionState<CommentWithUser>) => {
-		onCreate?.(actionState.data);
-	};
+			if (result.error) {
+				toast.error(result.error.message);
+			} else {
+				toast.success('Comment created successfully');
+				form.formHook.reset();
+				refresh();
+			}
+		},
+	});
+
+	const { isSubmitting } = form.formHook.formState;
 
 	return (
-		<ActionForm action={action} actionState={actionState} onSuccess={handleSuccess}>
-			<Textarea name="content" placeholder="What's on your mind?" />
-			<FieldError actionState={actionState} name="content" />
-			<SubmitButton>Comment</SubmitButton>
-		</ActionForm>
+		<Form form={form}>
+			<InputTextarea name="content" placeholder="What's on your mind?" />
+			<SubmitButton isSubmitting={isSubmitting}>Comment</SubmitButton>
+		</Form>
 	);
 }
 

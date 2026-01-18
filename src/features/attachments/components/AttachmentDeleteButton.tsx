@@ -9,11 +9,15 @@ import deleteAttachment from '../actions/deleteAttachment';
 
 type Props = {
 	id: string;
+	refresh?: () => void;
 };
 
-function AttachmentDeleteButton({ id }: Props) {
+function AttachmentDeleteButton({ id, refresh }: Props) {
 	const [open, openModal, closeModal] = useModal();
-	const onSuccess = () => toast.success('Attachment deleted');
+	const onSuccess = () => {
+		toast.success('Attachment deleted');
+		refresh?.();
+	};
 
 	return (
 		<>

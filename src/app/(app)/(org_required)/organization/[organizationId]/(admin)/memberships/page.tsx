@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import Heading from '@/components/Heading';
 import Spinner from '@/components/Spinner';
-import { InvitationCreateButton } from '@/features/invitation/components/InvitationCreateButton';
+import InvitationCreateButton from '@/features/invitation/components/InvitationCreateButton';
 import MembershipList from '@/features/membership/components/MembershipList';
 import OrganizationBreadcrumbs from '../../../_navigation/Tabs';
 

@@ -7,10 +7,10 @@ const attachmentDeleteEvent = inngest.createFunction(
 	{ id: 'attachment-delete' },
 	{ event: 'app/attachment.delete' },
 	async ({ event }) => {
-		const { attachmentId, organizationId, ticketId, fileName } = event.data;
+		const { attachmentId, organizationId, entity, entityId, fileName } = event.data;
 
 		try {
-			const key = generateS3Key({ organizationId, ticketId, fileName, attachmentId });
+			const key = generateS3Key({ organizationId, entity, entityId, fileName, attachmentId });
 			const deleteData = { Bucket: process.env.AWS_BUCKET_NAME, Key: key };
 			await s3.send(new DeleteObjectCommand(deleteData));
 		} catch (error) {

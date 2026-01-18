@@ -1,12 +1,15 @@
+import type { AttachmentEntity } from '@/generated/prisma/client';
+
 type Params = {
 	organizationId: string;
-	ticketId: string;
+	entity: AttachmentEntity;
+	entityId: string;
 	fileName: string;
 	attachmentId: string;
 };
 
-const generateS3Key = ({ organizationId, ticketId, fileName, attachmentId }: Params) => {
-	return `${organizationId}/${ticketId}/${fileName}-${attachmentId}`;
+const generateS3Key = ({ organizationId, entity, entityId, fileName, attachmentId }: Params) => {
+	return `${organizationId}/${entity}/${entityId}/${fileName}-${attachmentId}`;
 };
 
 export default generateS3Key;

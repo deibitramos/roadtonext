@@ -20,11 +20,11 @@ import {
 import createInvitation from '../actions/createInvitation';
 import createInvitationSchema from '../schemas/createInvitationSchema';
 
-type InvitationCreateButtonProps = {
+type Props = {
 	organizationId: string;
 };
 
-const InvitationCreateButton = ({ organizationId }: InvitationCreateButtonProps) => {
+function InvitationCreateButton({ organizationId }: Props) {
 	const [open, openModal, closeModal] = useModal();
 	const form = useForm(createInvitationSchema, {
 		submit: async (data) => {
@@ -68,6 +68,6 @@ const InvitationCreateButton = ({ organizationId }: InvitationCreateButtonProps)
 			</DialogContent>
 		</Dialog>
 	);
-};
+}
 
-export { InvitationCreateButton };
+export default InvitationCreateButton;
