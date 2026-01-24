@@ -5,7 +5,7 @@ import { useInView } from 'react-intersection-observer';
 import CardCompact from '@/components/CardCompact';
 import type { Paginated } from '@/components/Pagination';
 import type { CommentWithUser } from '../../queries/getComments';
-import CreateForm from '../CreateForm';
+import CommentCreateForm from '../CommentCreateForm';
 import CommentList from './CommentList';
 import usePaginatedComments from './usePaginatedComments';
 
@@ -29,7 +29,7 @@ function Comments({ ticketId, paginatedComments }: Props) {
 	return (
 		<>
 			<CardCompact title="Create Comment" description="A new comment will be created">
-				<CreateForm ticketId={ticketId} refresh={refresh} />
+				<CommentCreateForm ticketId={ticketId} refresh={refresh} />
 			</CardCompact>
 			<CommentList comments={comments} refresh={refresh} />
 			<div ref={ref}>

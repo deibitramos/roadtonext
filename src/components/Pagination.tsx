@@ -1,3 +1,4 @@
+import { useTransition } from 'react';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
@@ -47,23 +48,38 @@ function Pagination({ pagination, onPagination, metadata }: Props) {
 	const actualEndOffset = Math.min(endOffset, metadata.count);
 	const { count, hasNextPage } = metadata;
 	const label = `${startOffset} - ${actualEndOffset} of ${count}`;
+	const [isPending, startTransition] = useTransition();
 
 	const handlePreviousPage = () => {
-		onPagination({ ...pagination, page: pagination.page - 1 });
+		startTransition(async () => {
+			onPagination({ ...pagination, page: pagination.page - 1 });
+		});
 	};
 
 	const handleNextPage = () => {
-		onPagination({ ...pagination, page: pagination.page + 1 });
+		startTransition(async () => {
+			onPagination({ ...pagination, page: pagination.page + 1 });
+		});
 	};
 
 	const previousButton = (
-		<Button variant="outline" size="sm" disabled={pagination.page < 1} onClick={handlePreviousPage}>
+		<Button
+			variant="outline"
+			size="sm"
+			disabled={pagination.page < 1 || isPending}
+			onClick={handlePreviousPage}
+		>
 			Previous
 		</Button>
 	);
 
 	const nextButton = (
-		<Button variant="outline" size="sm" disabled={!hasNextPage} onClick={handleNextPage}>
+		<Button
+			variant="outline"
+			size="sm"
+			disabled={!hasNextPage || isPending}
+			onClick={handleNextPage}
+		>
 			Next
 		</Button>
 	);

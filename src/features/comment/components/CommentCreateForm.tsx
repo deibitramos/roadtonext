@@ -2,11 +2,13 @@
 
 import { toast } from 'sonner';
 import Form from '@/components/form/Form';
+import InputFile from '@/components/form/fields/InputFile';
 import InputTextarea from '@/components/form/fields/InputTextarea';
 import useForm from '@/components/form/hooks/useForm';
 import SubmitButton from '@/components/form/SubmitButton';
+import { ACCEPTED } from '@/features/attachments/constants';
 import createComment from '../actions/createComment';
-import createCommentSchema from '../schemas/createCommentSchema';
+import { getCommentSchema } from '../schemas/createCommentSchema';
 
 type Props = {
 	ticketId: string;
@@ -14,7 +16,8 @@ type Props = {
 };
 
 function CreateForm({ ticketId, refresh }: Props) {
-	const form = useForm(createCommentSchema, {
+	const schema = getCommentSchema(true);
+	const form = useForm(schema, {
 		defaultValues: { content: '' },
 		submit: async (data) => {
 			const result = await createComment(ticketId, data);
@@ -34,6 +37,7 @@ function CreateForm({ ticketId, refresh }: Props) {
 	return (
 		<Form form={form}>
 			<InputTextarea name="content" placeholder="What's on your mind?" />
+			<InputFile name="files" id="files" multiple accept={ACCEPTED.join(',')} />
 			<SubmitButton isSubmitting={isSubmitting}>Comment</SubmitButton>
 		</Form>
 	);

@@ -1,35 +1,38 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import isOwner from '@/features/auth/utils/isOwner';
+import * as service from '@/features/attachments/service';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import { getErrorMessage } from '@/lib/error';
-import prisma from '@/lib/prisma';
 import { actionError, actionSuccess } from '@/lib/types';
-import type { CommentWithUser } from '../queries/getComments';
-import createCommentSchema, { type CreateCommentData } from '../schemas/createCommentSchema';
+import * as db from '../data';
+import { type CreateCommentData, getCommentSchema } from '../schemas/createCommentSchema';
 
 const createComment = async (ticketId: string, data: CreateCommentData) => {
 	const user = await getSessionUserOrRedirect();
 
-	const result = createCommentSchema.safeParse(data);
+	const schema = getCommentSchema(false);
+	const result = schema.safeParse(data);
 	if (!result.success) {
 		return actionError(result.error.issues[0]?.message || 'Invalid data');
 	}
 
+	const { content, files } = result.data;
+
 	try {
-		const dbComment = await prisma.comment.create({
-			data: { userId: user.id, ticketId, ...result.data },
-			include: {
-				user: { select: { name: true } },
-				attachments: true,
-			},
+		const comment = await db.createComment({
+			userId: user.id,
+			ticketId,
+			content,
+			options: { includeUser: true, includeTicket: true },
 		});
 
-		const comment: CommentWithUser = {
-			...dbComment,
-			owner: isOwner(user, dbComment),
-		};
+		await service.createAttachments({
+			subject: comment,
+			entity: 'COMMENT',
+			entityId: comment.id,
+			files,
+		});
 
 		revalidatePath(`/tickets/${ticketId}`);
 		return actionSuccess(comment);

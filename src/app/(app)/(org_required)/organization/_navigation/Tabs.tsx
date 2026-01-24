@@ -8,6 +8,7 @@ const tabSections = (organizationId: string) =>
 	({
 		memberships: ['Memberships', `/organization/${organizationId}/memberships` as Route],
 		invitations: ['Invitations', `/organization/${organizationId}/invitations` as Route],
+		credentials: ['Credentials', `/organization/${organizationId}/credentials` as Route],
 	}) satisfies { [key: string]: [string, Route] };
 
 function OrganizationBreadcrumbs() {

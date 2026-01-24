@@ -9,7 +9,7 @@ import SubmitButton from '@/components/form/SubmitButton';
 import type { AttachmentEntity } from '@/generated/prisma/client';
 import createAttachment from '../actions/createAttachment';
 import { ACCEPTED } from '../constants';
-import createAttachmentSchema from '../schemas/createAttachmentSchema';
+import { getClientFilesSchema } from '../schemas/createAttachmentSchema';
 
 type Props = {
 	entityId: string;
@@ -19,7 +19,8 @@ type Props = {
 };
 
 function AttachmentCreateForm({ entityId, entity, buttons, onSuccess }: Props) {
-	const form = useForm(createAttachmentSchema, {
+	const schema = getClientFilesSchema(true);
+	const form = useForm(schema, {
 		submit: async (data) => {
 			const { error } = await createAttachment(entity, entityId, data);
 			if (error) {

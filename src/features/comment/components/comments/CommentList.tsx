@@ -1,7 +1,5 @@
-import AttachmentCreateButton from '@/features/attachments/components/AttachmentCreateButton';
 import AttachmentDeleteButton from '@/features/attachments/components/AttachmentDeleteButton';
 import AttachmentList from '@/features/attachments/components/AttachmentList';
-import { AttachmentEntity } from '@/generated/prisma/browser';
 import type { CommentWithUser } from '../../queries/getComments';
 import CommentDeleteButton from '../CommentDeleteButton';
 import CommentItem, { type CommentSection } from '../CommentItem';
@@ -20,15 +18,7 @@ function CommentList({ comments, refresh }: Props) {
 					const deleteButton = (
 						<CommentDeleteButton key={`del-${id}`} id={comment.id} refresh={refresh} />
 					);
-					const attachmentCreateButton = (
-						<AttachmentCreateButton
-							key={`att-${id}`}
-							entity={AttachmentEntity.COMMENT}
-							entityId={comment.id}
-							refresh={refresh}
-						/>
-					);
-					const buttons = comment.owner ? [deleteButton, attachmentCreateButton] : [];
+					const buttons = comment.owner ? [deleteButton] : [];
 
 					const sections: CommentSection[] = [];
 					if (comment.attachments.length) {
