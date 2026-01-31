@@ -8,6 +8,7 @@ import createOrganizationSchema, {
 } from '@/features/organization/schemas/createOrganizationSchema';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import { getErrorMessage } from '@/lib/error';
+import inngest from '@/lib/inngest';
 import prisma from '@/lib/prisma';
 import { actionError } from '@/lib/types';
 
@@ -20,8 +21,8 @@ const createOrganization = async (data: CreateOrganizationData) => {
 	}
 
 	try {
-		await prisma.$transaction(async (tx) => {
-			const organization = await tx.organization.create({
+		const organization = await prisma.$transaction(async (tx) => {
+			const org = await tx.organization.create({
 				data: {
 					...result.data,
 					memberships: {
@@ -31,9 +32,19 @@ const createOrganization = async (data: CreateOrganizationData) => {
 			});
 
 			await tx.membership.updateMany({
-				where: { userId: user.id, organizationId: { not: organization.id } },
+				where: { userId: user.id, organizationId: { not: org.id } },
 				data: { isActive: false },
 			});
+
+			return org;
+		});
+
+		await inngest.send({
+			name: 'app/organization.created',
+			data: {
+				organizationId: organization.id,
+				byEmail: user.email,
+			},
 		});
 
 		revalidatePath('/organization');

@@ -4,7 +4,7 @@ import { ArrowLeftRightIcon } from 'lucide-react';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
 import SubmitButton from '@/components/form/SubmitButton';
-import switchOrganization from '@/organization/actions/switchOrganization';
+import switchOrganization from '@/features/organization/actions/switchOrganization';
 
 type Props = {
 	organizationId: string;

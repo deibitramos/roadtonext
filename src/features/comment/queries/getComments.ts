@@ -5,7 +5,7 @@ import { getSessionUserOrUndefined } from '@/lib/auth/session';
 import prisma from '@/lib/prisma';
 
 const getComments = async (ticketId: string, cursor?: number) => {
-	const user = await getSessionUserOrUndefined();
+	const user = await getSessionUserOrUndefined({ skipOrganizations: true });
 	const where = { ticketId, createdAt: cursor ? { lt: new Date(cursor) } : undefined };
 	const take = 2;
 

@@ -5,7 +5,7 @@ import Form from '@/components/form/Form';
 import InputText from '@/components/form/fields/InputText';
 import useForm from '@/components/form/hooks/useForm';
 import SubmitButton from '@/components/form/SubmitButton';
-import createOrganization from '@/organization/actions/createOrganization';
+import createOrganization from '@/features/organization/actions/createOrganization';
 import createOrganizationSchema from '../schemas/createOrganizationSchema';
 
 function OrganizationCreateForm() {

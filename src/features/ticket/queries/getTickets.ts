@@ -1,5 +1,4 @@
 import isOwner from '@/features/auth/utils/isOwner';
-import getUserMembership from '@/features/membership/actions/getUserMembership';
 import { getSessionUserOrUndefined } from '@/lib/auth/session';
 import prisma from '@/lib/prisma';
 import type { ParsedSearchParams } from '../searchParams';
@@ -10,9 +9,9 @@ const getTickets = async (
 	byOrganization: boolean,
 ) => {
 	const user = await getSessionUserOrUndefined();
-	const { organizations, activeMembershipId } = await getUserMembership(user?.id ?? '');
 
 	const { search, sortKey, sortValue } = searchParams;
+	const { organizations = [], activeMembershipId } = user ?? {};
 
 	const where = {
 		userId: userId ?? undefined,

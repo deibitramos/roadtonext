@@ -16,6 +16,7 @@ type Events = {
 			fileName: string;
 		};
 	};
+	'app/organization.created': { data: { organizationId: string; byEmail: string } };
 };
 
 const inngest = new Inngest({

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import getAdminOrRedirect from '@/features/membership/queries/getAdminOrRedirect';
+import getStripeProvisioning from '@/features/stripe/queries/getStripeProvisioning';
 import { getErrorMessage } from '@/lib/error';
 import inngest from '@/lib/inngest';
 import prisma from '@/lib/prisma';
@@ -13,6 +14,11 @@ import generateInvitationLink from '../utils/generateInvitationLink';
 
 const createInvitation = async (organizationId: string, data: CreateInvitationData) => {
 	const user = await getAdminOrRedirect(organizationId);
+	const { allowedMembers, currentMembers } = await getStripeProvisioning(organizationId);
+
+	if (currentMembers >= allowedMembers) {
+		return actionError('Upgrade your subscription to invite more members');
+	}
 
 	try {
 		const { email } = createInvitationSchema.parse(data);
