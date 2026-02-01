@@ -1,11 +1,9 @@
 import isOwner from '@/features/auth/utils/isOwner';
-import getUserMembership from '@/features/membership/actions/getUserMembership';
 import { getSessionUserOrUndefined } from '@/lib/auth/session';
 import prisma from '@/lib/prisma';
 
 const getTicket = async (id: string) => {
 	const user = await getSessionUserOrUndefined();
-	const { organizations } = await getUserMembership(user?.id ?? '');
 
 	const ticket = await prisma.ticket.findUnique({
 		where: { id },
@@ -14,6 +12,7 @@ const getTicket = async (id: string) => {
 	if (!ticket) return null;
 
 	const owner = isOwner(user, ticket);
+	const { organizations = [] } = user ?? {};
 	const ticketOrganization = organizations.find((o) => o.id === ticket.organizationId);
 	const { canDeleteTicket = false } = ticketOrganization || {};
 

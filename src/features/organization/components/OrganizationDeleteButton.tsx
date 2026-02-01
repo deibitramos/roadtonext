@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import useModal from '@/components/hooks/useModal';
 import { Button } from '@/components/ui/button';
-import deleteOrganization from '@/organization/actions/deleteOrganization';
+import deleteOrganization from '@/features/organization/actions/deleteOrganization';
 
 type Props = {
 	organizationId: string;

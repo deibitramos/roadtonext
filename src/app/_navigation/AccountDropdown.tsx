@@ -1,5 +1,5 @@
 import { DropdownMenu } from '@radix-ui/react-dropdown-menu';
-import { LockIcon } from 'lucide-react';
+import { GemIcon, LockIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -41,6 +41,12 @@ async function AccountDropdown() {
 					<Link href="/account/password">
 						<LockIcon className="mr-2" />
 						<span>Password</span>
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem asChild>
+					<Link href="/pricing">
+						<GemIcon className="mr-2" />
+						<span>Pricing</span>
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />

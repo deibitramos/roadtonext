@@ -35,9 +35,19 @@ export const getSessionUserOrRedirect = cache(async (options: SessionOptions = {
 	return { ...userSession.user, activeMembershipId, organizations };
 });
 
-export const getSessionUserOrUndefined = cache(async () => {
+export type UserOrUndefinedArgs = {
+	skipOrganizations?: boolean;
+};
+
+export const getSessionUserOrUndefined = cache(async (args: UserOrUndefinedArgs = {}) => {
+	const { skipOrganizations = false } = args;
 	const userSession = await getAuthSession();
-	return userSession?.user;
+	if (!userSession?.user) return undefined;
+	if (skipOrganizations)
+		return { ...userSession.user, organizations: [], activeMembershipId: undefined };
+
+	const { organizations, activeMembershipId } = await getUserMembership(userSession.user.id);
+	return { ...userSession.user, organizations, activeMembershipId };
 });
 
 export const isAuthenticated = cache(async () => {
