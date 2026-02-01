@@ -12,7 +12,7 @@ type Props = {
 };
 
 function CommentDeleteButton({ id, refresh }: Props) {
-	const [open, openModal, closeModal] = useModal();
+	const { open, openModal, closeModal } = useModal();
 
 	return (
 		<>

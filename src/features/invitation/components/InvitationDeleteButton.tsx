@@ -12,7 +12,7 @@ type Props = {
 };
 
 function InvitationDeleteButton({ id }: Props) {
-	const [open, openModal, closeModal] = useModal();
+	const { open, openModal, closeModal } = useModal();
 	const onSuccess = () => toast.success('Invitation deleted');
 
 	return (

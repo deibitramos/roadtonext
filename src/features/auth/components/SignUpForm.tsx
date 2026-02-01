@@ -2,6 +2,7 @@
 
 import { toast } from 'sonner';
 import Form from '@/components/form/Form';
+import HoneyPot from '@/components/form/fields/HoneyPot';
 import InputText from '@/components/form/fields/InputText';
 import useForm from '@/components/form/hooks/useForm';
 import SubmitButton from '@/components/form/SubmitButton';
@@ -26,6 +27,7 @@ function SignUpForm() {
 			<InputText name="email" placeholder="Email" />
 			<InputText type="password" name="password" placeholder="Password" />
 			<InputText type="password" name="confirmPassword" placeholder="Confirm Password" />
+			<HoneyPot />
 			<SubmitButton isSubmitting={isSubmitting}>Sign Up</SubmitButton>
 		</Form>
 	);

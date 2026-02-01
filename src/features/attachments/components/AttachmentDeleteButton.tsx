@@ -13,7 +13,7 @@ type Props = {
 };
 
 function AttachmentDeleteButton({ id, refresh }: Props) {
-	const [open, openModal, closeModal] = useModal();
+	const { open, openModal, closeModal } = useModal();
 	const onSuccess = () => {
 		toast.success('Attachment deleted');
 		refresh?.();

@@ -1,20 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-const authRoutes = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password'];
-const publicRoutes = ['/'];
-
-// Better Auth session cookie name
-const SESSION_COOKIE = 'better-auth.session_token';
-
-export async function proxy(request: NextRequest) {
-	const url = request.nextUrl.pathname;
-
-	if (publicRoutes.includes(url) || authRoutes.some((path) => url.startsWith(path)))
-		return NextResponse.next();
-
-	const hasSessionCookie = !!request.cookies.get(SESSION_COOKIE)?.value;
-	if (!hasSessionCookie) return NextResponse.redirect(new URL('/sign-in', request.url));
-
+export async function proxy(_request: NextRequest) {
 	return NextResponse.next();
 }
 

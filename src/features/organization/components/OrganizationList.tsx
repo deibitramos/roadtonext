@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { ArrowUpRightFromSquareIcon, PenIcon } from 'lucide-react';
+import { ArrowUpRightFromSquareIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -53,12 +53,6 @@ async function OrganizationList({ protect = true }: Props) {
 						</Button>
 					);
 
-					const editButton = (
-						<Button variant="outline">
-							<PenIcon className="size-4" />
-						</Button>
-					);
-
 					const leaveButton = (
 						<MembershipDeleteButton
 							userId={organization.membershipByUser.userId}
@@ -88,7 +82,6 @@ async function OrganizationList({ protect = true }: Props) {
 								/>
 								{protect && isAdmin ? detailButton : placeholder}
 								{protect && isAdmin ? membershipMoreMenu : placeholder}
-								{protect && isAdmin ? editButton : placeholder}
 								{protect ? leaveButton : placeholder}
 								{protect && isAdmin ? deleteButton : placeholder}
 							</TableCell>

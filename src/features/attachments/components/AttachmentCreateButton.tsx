@@ -23,24 +23,24 @@ type Props = {
 };
 
 function AttachmentCreateButton({ entity, entityId, refresh }: Props) {
-	const [open, openModal, closeModal] = useModal();
+	const { open, closeModal, onOpenChange } = useModal();
 	const onSuccess = () => {
 		closeModal();
 		refresh();
 	};
 
 	return (
-		<Dialog open={open} onOpenChange={openModal}>
+		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogTrigger asChild>
 				<Button>
 					<PlusIcon className="w-4 h-4" />
-					Invite Member
+					Upload Attachment
 				</Button>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Invite Member</DialogTitle>
-					<DialogDescription>Invite a user by email to your organization</DialogDescription>
+					<DialogTitle>Upload Attachment</DialogTitle>
+					<DialogDescription>Upload a file to your organization</DialogDescription>
 				</DialogHeader>
 				<AttachmentCreateForm
 					entity={entity}

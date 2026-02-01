@@ -6,6 +6,8 @@ const signUpSchema = z
 		email: z.email().min(1, 'Required').max(191),
 		password: z.string().min(6).max(191),
 		confirmPassword: z.string().min(6).max(191),
+		// Honeypot field - should always be empty (bots auto-fill this)
+		website: z.string().max(0, 'Invalid submission').optional(),
 	})
 	.superRefine((data, ctx) => {
 		if (data.password !== data.confirmPassword) {

@@ -25,7 +25,7 @@ type Props = {
 };
 
 function TicketMoreMenu({ ticket }: Props) {
-	const [open, openModal, closeModal] = useModal();
+	const { open, openModal, closeModal } = useModal();
 
 	const onUpdateStatus = async (value: string) => {
 		const promise = updateTicketStatus(ticket.id, value as typeof ticket.status);

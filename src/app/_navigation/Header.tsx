@@ -15,6 +15,9 @@ function Header({ children }: Props) {
 						<h1 className="text-lg font-semibold">TicketBounty</h1>
 					</Link>
 				</Button>
+				<span className="hidden sm:inline text-xs text-muted-foreground">
+					Demo project · Payments are simulated
+				</span>
 			</div>
 			<div className="flex items-center gap-x-2">
 				<ThemeSwitcher />

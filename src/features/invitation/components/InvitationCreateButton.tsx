@@ -25,7 +25,7 @@ type Props = {
 };
 
 function InvitationCreateButton({ organizationId }: Props) {
-	const [open, openModal, closeModal] = useModal();
+	const { open, closeModal, onOpenChange } = useModal();
 	const form = useForm(createInvitationSchema, {
 		submit: async (data) => {
 			const { error } = await createInvitation(organizationId, data);
@@ -42,7 +42,7 @@ function InvitationCreateButton({ organizationId }: Props) {
 	const { isSubmitting } = form.formHook.formState;
 
 	return (
-		<Dialog open={open} onOpenChange={openModal}>
+		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogTrigger asChild>
 				<Button>
 					<PlusIcon className="w-4 h-4" />

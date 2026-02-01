@@ -25,7 +25,7 @@ type Props = {
 };
 
 function CredentialCreateButton({ organizationId }: Props) {
-	const [open, openModal, closeModal] = useModal();
+	const { open, closeModal, onOpenChange } = useModal();
 	const form = useForm(createCredentialSchema, {
 		submit: async (data) => {
 			const { error } = await createCredential(organizationId, data);
@@ -42,7 +42,7 @@ function CredentialCreateButton({ organizationId }: Props) {
 	const { isSubmitting } = form.formHook.formState;
 
 	return (
-		<Dialog open={open} onOpenChange={openModal}>
+		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogTrigger asChild>
 				<Button>
 					<PlusIcon className="size-4" />

@@ -14,7 +14,10 @@ const signUp = async (data: SignUpData) => {
 		return actionError(parsedData.error.issues[0]?.message || 'Invalid data');
 	}
 
-	const { name, email, password } = parsedData.data;
+	const { name, email, password, website } = parsedData.data;
+
+	// Honeypot check - bots auto-fill all fields including hidden ones
+	if (website) return actionError('Invalid submission');
 
 	const result = await auth.api.signUpEmail({ body: { name, email, password } });
 	if (!result) {

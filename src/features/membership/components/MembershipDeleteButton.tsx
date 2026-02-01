@@ -14,7 +14,7 @@ type Props = {
 };
 
 function MembershipDeleteButton({ userId, organizationId, myself }: Props) {
-	const [open, openModal, closeModal] = useModal();
+	const { open, openModal, closeModal } = useModal();
 	const toastMessage = myself ? 'You left the organization' : 'Membership deleted successfully';
 	const onSuccess = () => toast.success(toastMessage);
 

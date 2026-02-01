@@ -18,16 +18,15 @@ export async function POST(req: Request) {
 
 	try {
 		event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-
 		switch (event.type) {
 			case 'customer.subscription.created':
-				onSubscriptionCreated(event.data.object);
+				await onSubscriptionCreated(event.data.object);
 				break;
 			case 'customer.subscription.updated':
-				onSubscriptionUpdated(event.data.object);
+				await onSubscriptionUpdated(event.data.object);
 				break;
 			case 'customer.subscription.deleted':
-				onSubscriptionDeleted(event.data.object);
+				await onSubscriptionDeleted(event.data.object);
 				break;
 			default:
 				console.log(`Unhandled event type ${event.type}.`);

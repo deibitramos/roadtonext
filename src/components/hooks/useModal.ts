@@ -5,8 +5,9 @@ function useModal() {
 
 	const openModal = () => setOpen(true);
 	const closeModal = () => setOpen(false);
+	const onOpenChange = (isOpen: boolean) => setOpen(isOpen);
 
-	return [open, openModal, closeModal] as const;
+	return { open, openModal, closeModal, onOpenChange } as const;
 }
 
 export default useModal;

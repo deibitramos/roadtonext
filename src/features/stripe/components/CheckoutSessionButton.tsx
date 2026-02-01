@@ -36,10 +36,12 @@ function CheckoutSessionButton({ organizationId, priceId, activePriceId, childre
 			disabled={isActive}
 			onClick={handleCheckoutSession}
 			isSubmitting={isPending}
-			className={cn('flex flex-col', !!activePriceId && 'h-16')}
+			className={cn(!!activePriceId && 'h-16')}
 		>
-			{!activePriceId ? null : isActive ? <span>Current Plan</span> : <span>Change Plan</span>}
-			<div>{children}</div>
+			<div className="flex flex-col">
+				{!activePriceId ? null : isActive ? <span>Current Plan</span> : <span>Change Plan</span>}
+				<div>{children}</div>
+			</div>
 		</SubmitButton>
 	);
 }

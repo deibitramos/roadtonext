@@ -12,7 +12,7 @@ type Props = {
 };
 
 function OrganizationDeleteButton({ organizationId }: Props) {
-	const [open, openModal, closeModal] = useModal();
+	const { open, openModal, closeModal } = useModal();
 	const onSuccess = () => toast.success('Organization deleted successfully');
 	return (
 		<>
