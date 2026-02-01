@@ -3,9 +3,11 @@ import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { nextCookies } from 'better-auth/next-js';
 import { emailOTP } from 'better-auth/plugins';
 import prisma from '@/lib/prisma';
+import getBaseUrl from '@/lib/url';
 import inngest from '../inngest';
 
 export const auth = betterAuth({
+	baseURL: getBaseUrl(),
 	database: prismaAdapter(prisma, { provider: 'postgresql' }),
 	plugins: [
 		nextCookies(),

@@ -12,6 +12,8 @@ declare global {
 			AWS_SECRET_ACCESS_KEY: string;
 			STRIPE_SECRET_KEY: string;
 			STRIPE_WEBHOOK_SECRET: string;
+			BETTER_AUTH_BASE_URL?: string;
+			NEXT_PUBLIC_BASE_URL?: string;
 		}
 	}
 }
