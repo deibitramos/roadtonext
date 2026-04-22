@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import isOwner from '@/features/auth/utils/isOwner';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import { getErrorMessage } from '@/lib/error';
-import inngest from '@/lib/inngest';
+import inngest, { attachmentDeleteEvent } from '@/lib/inngest';
 import prisma from '@/lib/prisma';
 import { actionError, actionSuccess } from '@/lib/types';
 import { isTicket } from '../types';
@@ -43,7 +43,7 @@ const deleteAttachment = async (id: string) => {
 			entityId: subject.id,
 			fileName: attachment.name,
 		};
-		await inngest.send({ name: 'app/attachment.delete', data: dataForEvent });
+		await inngest.send(attachmentDeleteEvent.create(dataForEvent));
 	} catch (error) {
 		return actionError(getErrorMessage(error));
 	}

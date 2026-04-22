@@ -1,10 +1,9 @@
-import inngest from '@/lib/inngest';
+import inngest, { passwordResetEvent } from '@/lib/inngest';
 import prisma from '@/lib/prisma';
 import sendPasswordReset from '../emails/sendPasswordReset';
 
 const eventPasswordReset = inngest.createFunction(
-	{ id: 'password-reset' },
-	{ event: 'app/password.password-reset' },
+	{ id: 'password-reset', triggers: [passwordResetEvent] },
 	async ({ event }) => {
 		const { email, url } = event.data;
 

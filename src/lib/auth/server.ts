@@ -4,7 +4,7 @@ import { nextCookies } from 'better-auth/next-js';
 import { emailOTP } from 'better-auth/plugins';
 import prisma from '@/lib/prisma';
 import getBaseUrl from '@/lib/url';
-import inngest from '../inngest';
+import inngest, { passwordResetEvent, signUpEvent } from '../inngest';
 
 export const auth = betterAuth({
 	baseURL: getBaseUrl(),
@@ -16,7 +16,7 @@ export const auth = betterAuth({
 			async sendVerificationOTP(params) {
 				const { email, otp, type } = params;
 				if (type !== 'email-verification') return;
-				await inngest.send({ name: 'app/auth.sign-up', data: { email, otp } });
+				await inngest.send(signUpEvent.create({ email, otp }));
 			},
 		}),
 	],
@@ -25,7 +25,7 @@ export const auth = betterAuth({
 		enabled: true,
 		minPasswordLength: 6,
 		sendResetPassword: async ({ user, url }) => {
-			await inngest.send({ name: 'app/password.password-reset', data: { email: user.email, url } });
+			await inngest.send(passwordResetEvent.create({ email: user.email, url }));
 		},
 	},
 });

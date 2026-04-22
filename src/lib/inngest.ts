@@ -1,27 +1,45 @@
-import { EventSchemas, Inngest } from 'inngest';
+import { eventType, Inngest, staticSchema } from 'inngest';
 import type { AttachmentEntity } from '@/generated/prisma/browser';
 
-type Events = {
-	'app/password.password-reset': { data: { email: string; url: string } };
-	'app/auth.sign-up': { data: { email: string; otp: string } };
-	'app/invitation.send': {
-		data: { userId: string; organizationId: string; email: string; invitationLink: string };
-	};
-	'app/attachment.delete': {
-		data: {
-			attachmentId: string;
-			organizationId: string;
-			entity: AttachmentEntity;
-			entityId: string;
-			fileName: string;
-		};
-	};
-	'app/organization.created': { data: { organizationId: string; byEmail: string } };
+export type PasswordResetEventData = { email: string; url: string };
+export type SignUpEventData = { email: string; otp: string };
+export type InvitationSendEventData = {
+	userId: string;
+	organizationId: string;
+	email: string;
+	invitationLink: string;
 };
+export type AttachmentDeleteEventData = {
+	attachmentId: string;
+	organizationId: string;
+	entity: AttachmentEntity;
+	entityId: string;
+	fileName: string;
+};
+export type OrganizationCreatedEventData = { organizationId: string; byEmail: string };
+
+export const passwordResetEvent = eventType('app/password.password-reset', {
+	schema: staticSchema<PasswordResetEventData>(),
+});
+
+export const signUpEvent = eventType('app/auth.sign-up', {
+	schema: staticSchema<SignUpEventData>(),
+});
+
+export const invitationSendEvent = eventType('app/invitation.send', {
+	schema: staticSchema<InvitationSendEventData>(),
+});
+
+export const attachmentDeleteEvent = eventType('app/attachment.delete', {
+	schema: staticSchema<AttachmentDeleteEventData>(),
+});
+
+export const organizationCreatedEvent = eventType('app/organization.created', {
+	schema: staticSchema<OrganizationCreatedEventData>(),
+});
 
 const inngest = new Inngest({
 	id: 'road-to-next',
-	schemas: new EventSchemas().fromRecord<Events>(),
 });
 
 export default inngest;

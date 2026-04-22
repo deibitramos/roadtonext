@@ -1,10 +1,9 @@
-import inngest from '@/lib/inngest';
+import inngest, { invitationSendEvent as invitationSendEventTrigger } from '@/lib/inngest';
 import prisma from '@/lib/prisma';
 import sendEmailInvitation from '../emails/sendEmailInvitation';
 
 const invitationSendEvent = inngest.createFunction(
-	{ id: 'invitation-send' },
-	{ event: 'app/invitation.send' },
+	{ id: 'invitation-send', triggers: [invitationSendEventTrigger] },
 	async ({ event }) => {
 		const { userId, organizationId, email, invitationLink } = event.data;
 

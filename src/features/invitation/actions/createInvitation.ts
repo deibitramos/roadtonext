@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import getAdminOrRedirect from '@/features/membership/queries/getAdminOrRedirect';
 import getStripeProvisioning from '@/features/stripe/queries/getStripeProvisioning';
 import { getErrorMessage } from '@/lib/error';
-import inngest from '@/lib/inngest';
+import inngest, { invitationSendEvent } from '@/lib/inngest';
 import prisma from '@/lib/prisma';
 import { actionError, actionSuccess } from '@/lib/types';
 import createInvitationSchema, {
@@ -32,10 +32,9 @@ const createInvitation = async (organizationId: string, data: CreateInvitationDa
 		}
 
 		const invitationLink = await generateInvitationLink(user.id, organizationId, email);
-		await inngest.send({
-			name: 'app/invitation.send',
-			data: { userId: user.id, organizationId, email, invitationLink },
-		});
+		await inngest.send(
+			invitationSendEvent.create({ userId: user.id, organizationId, email, invitationLink }),
+		);
 	} catch (error) {
 		const message = getErrorMessage(error, 'Failed to create invitation');
 		return actionError(message);

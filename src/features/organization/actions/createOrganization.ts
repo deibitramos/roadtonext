@@ -8,7 +8,7 @@ import createOrganizationSchema, {
 } from '@/features/organization/schemas/createOrganizationSchema';
 import { getSessionUserOrRedirect } from '@/lib/auth/session';
 import { getErrorMessage } from '@/lib/error';
-import inngest from '@/lib/inngest';
+import inngest, { organizationCreatedEvent } from '@/lib/inngest';
 import prisma from '@/lib/prisma';
 import { actionError } from '@/lib/types';
 
@@ -39,13 +39,12 @@ const createOrganization = async (data: CreateOrganizationData) => {
 			return org;
 		});
 
-		await inngest.send({
-			name: 'app/organization.created',
-			data: {
+		await inngest.send(
+			organizationCreatedEvent.create({
 				organizationId: organization.id,
 				byEmail: user.email,
-			},
-		});
+			}),
+		);
 
 		revalidatePath('/organization');
 	} catch (error) {

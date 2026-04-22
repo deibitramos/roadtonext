@@ -1,10 +1,9 @@
-import inngest from '@/lib/inngest';
+import inngest, { organizationCreatedEvent } from '@/lib/inngest';
 import prisma from '@/lib/prisma';
 import stripe from '@/lib/stripe';
 
 const eventOrganizationCreated = inngest.createFunction(
-	{ id: 'organization-created' },
-	{ event: 'app/organization.created' },
+	{ id: 'organization-created', triggers: [organizationCreatedEvent] },
 	async ({ event }) => {
 		const { organizationId, byEmail } = event.data;
 

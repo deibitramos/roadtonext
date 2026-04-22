@@ -1,10 +1,9 @@
-import inngest from '@/lib/inngest';
+import inngest, { signUpEvent } from '@/lib/inngest';
 import prisma from '@/lib/prisma';
 import sendEmailVerification from '../emails/sendEmailVerification';
 
 const eventSignUp = inngest.createFunction(
-	{ id: 'auth-sign-up' },
-	{ event: 'app/auth.sign-up' },
+	{ id: 'auth-sign-up', triggers: [signUpEvent] },
 	async ({ event }) => {
 		const { email, otp } = event.data;
 
